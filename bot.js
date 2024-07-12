@@ -49,14 +49,14 @@ async function scrapeProfiles(page, jsonData) {
 	const profileData = [];
 	console.log('number of profile urls...')
 	console.log(profileURLs.length);
-	for (const profile_url of profileURLs) {
+	for (const profile_url of profileURLs.slice(0, 2)) {
 		try {
 		console.log(`Visiting: ${profile_url}`);
 		await page.goto(profile_url, { waitUntil: 'networkidle2' });
 		await page.waitForSelector(jsonData['profile_name'], { timeout: 5000 });
 		const profile_name = await page.$eval(jsonData['profile_name'], el => el.textContent.trim());
 		console.log(`Name: ${profile_name}`);
-		profileData.push({ profile_name: profile_name, profile_url: profile_url });
+		profileData.push({ profile_name: profile_name });
 		// await sleep(10000);
 		} catch (error) {
 		console.error(`Error scraping profile: ${profile_url}`, error);
@@ -68,8 +68,8 @@ async function scrapeProfiles(page, jsonData) {
 
 async function saveToCsv(profileData) {
 	// Convert data to CSV format with headers
-	const csvHeader = 'name,profile_url';
-	const csvRows = profileData.map(row => `${row.name},${row.profile_url}`);
+	const csvHeader = 'name';
+	const csvRows = profileData.map(row => `${row.name}`);
 	const csvContent = [csvHeader, ...csvRows].join('\n');
 
 	// Write the CSV content to a file
