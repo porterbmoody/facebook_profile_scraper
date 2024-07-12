@@ -1,7 +1,11 @@
+const express = require('express');
+const bodyParser = require('body-parser');
 const puppeteer = require('puppeteer');
 const fs = require('fs');
-const { json } = require('stream/consumers');
 const { parse } = require('json2csv');
+
+const app = express();
+const PORT = 3000;
 
 function sleep(ms) {
 	return new Promise(resolve => setTimeout(resolve, ms));
@@ -19,12 +23,12 @@ async function readJsonFile() {
 	});
 }
 
-async function login(page, jsonData) {
+async function login(page, username, password, jsonData) {
 	try {
 		console.log('loggin in...');
-		await page.goto(jsonData['login_url'], { waitUntil: 'networkidle2' });
-		await page.type(jsonData['username_selector'], jsonData['username'], { delay: 30 });
-		await page.type(jsonData['password_selector'], jsonData['password'], { delay: 30 });
+		await page.goto('https://www.facebook.com/', { waitUntil: 'networkidle2' });
+		await page.type(jsonData['username_selector'], username, { delay: 30 });
+		await page.type(jsonData['password_selector'], password, { delay: 30 });
 		await page.click(jsonData['login_button']);
 		await page.waitForNavigation({ waitUntil: 'networkidle2' });
 		console.log('login successful');
@@ -102,7 +106,7 @@ async function saveToCsv(data) {
 	}
 }
 
-(async () => {
+async function scrape() {
 	try {
 		await new Promise(resolve => setTimeout(resolve, 2000));
 		const jsonData = await readJsonFile();
@@ -113,15 +117,27 @@ async function saveToCsv(data) {
 				'--disable-setuid-sandbox',
 				'--disable-notifications'
 			]
-		});s
+		});
 		const page = await browser.newPage();
-		await login(page, jsonData);
+		await login(page, email, password, jsonData);
 		const groupProfileURLs = await scrapeGroupProfileURLs(page, jsonData);
 		// console.log(groupProfileURLs);
 		await scrapeProfileData(page, jsonData, groupProfileURLs);
-
+	
 		// await browser.close();
 	} catch (error) {
 		console.error('An error occurred:', error);
 	}
+}
+
+(async () => {
+	await scrape()
 })();
+
+app.use(bodyParser.json());
+app.use(express.static('public'));
+
+app.post('/start-scraping', async (req, res) => {
+    const { email, password, groupUrl } = req.body;
+	await scrape(email, password, groupUrl)
+});
