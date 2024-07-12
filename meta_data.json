@@ -2,5 +2,5 @@
     "login_url": "https://www.facebook.com/",
     "username_selector" : "[aria-label='Email or phone number']",
     "password_selector" : "[aria-label='Password']",
-    "password_selector" : "[name='login']",
+    "login_button" : "[name='login']"
 }
