@@ -113,7 +113,7 @@ async function saveToCsv(data) {
 				'--disable-setuid-sandbox',
 				'--disable-notifications'
 			]
-		});
+		});s
 		const page = await browser.newPage();
 		await login(page, jsonData);
 		const groupProfileURLs = await scrapeGroupProfileURLs(page, jsonData);
