@@ -28,10 +28,7 @@ Open a terminal and run the following command to start the local backend server:
 ```sh
 node server.js
 ```
-### 3. Open the HTML Interface
-Open the `public/index.html` file in your web browser. You can do this by simply double-clicking the file or opening it through your browser's menu.
-
-### 4. Input Credentials and Group URL
+### 3. Input Credentials and Group URL
 In the web interface:
 
 Enter your Facebook credentials.

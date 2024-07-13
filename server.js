@@ -3,6 +3,7 @@ const cors = require('cors');
 const fs = require('fs').promises;
 const path = require('path');
 const { exec } = require('child_process');
+const opn = require('opn');
 
 const app = express();
 const port = 3000;
@@ -10,10 +11,8 @@ const port = 3000;
 app.use(cors());
 app.use(express.json());
 
-// Serve static files from the current directory
 app.use(express.static(__dirname));
 
-// Serve index.html at the root URL
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
@@ -60,5 +59,5 @@ app.post('/run-bot', async (req, res) => {
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 
-    open(`http://localhost:${port}`);
+    opn(`http://localhost:${port}`);
 });
