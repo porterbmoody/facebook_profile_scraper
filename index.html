@@ -50,41 +50,43 @@
     <div class="container">
         <h1>Facebook Group Scrape Bot</h1>
         <form id="scraper-form">
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="email" value="porterbmoody@gmail.com" required>
+            <label for="username">username:</label>
+            <input type="username" id="username" name="username" value="porterbmoody@gmail.com" required>
             <label for="password">Password:</label>
             <input type="password" id="password" name="password" value="Yoho1mes" required>
             <label for="group_url">Facebook Group URL:</label>
             <input type="url" id="group_url" name="group_url" value="https://www.facebook.com/groups/344194813025772/members/" required>
-            <button type="button" onclick="console.log('hi');">Run Bot</button>
+            <button type="button" onclick="runBot()">Run Bot</button>
         </form>
         <div id="result"></div>
     </div>
-    <script src="../test.js"></script>
-    <!-- <script> -->
-        <!-- async function runBot() { -->
-            <!-- console.log('runBot function called'); -->
-            <!-- document.getElementById('result').innerText = 'Running the bot...'; -->
+    <script>
+        async function runBot() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const group_url = document.getElementById('group_url').value;
 
-            <!-- const email = document.getElementById('email').value; -->
-            <!-- const password = document.getElementById('password').value; -->
-            <!-- const groupUrl = document.getElementById('group_url').value; -->
+            document.getElementById('result').innerText = 'Running the bot...';
 
-            <!-- console.log('Email:', email); -->
-            <!-- console.log('Password:', password); -->
-            <!-- console.log('Group URL:', groupUrl); -->
+            try {
+                const response = await fetch('http://localhost:3000/run-bot', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, password, group_url })
+                });
 
-            <!-- // const response = await fetch('/start-scraping', { -->
-            <!-- //     method: 'POST', -->
-            <!-- //     headers: { -->
-            <!-- //         'Content-Type': 'application/json' -->
-            <!-- //     }, -->
-            <!-- //     body: JSON.stringify({ email, password, groupUrl }) -->
-            <!-- // }); -->
+                if (!response.ok) {
+                    throw new Error('Server response was not ok');
+                }
 
-            <!-- // const result = await response.text(); -->
-            <!-- // document.getElementById('result').innerText = result; -->
-        <!-- } -->
-    <!-- </script> -->
+                const result = await response.text();
+                document.getElementById('result').innerText = result;
+            } catch (error) {
+                document.getElementById('result').innerText = 'Error: ' + error.message;
+            }
+        }
+    </script>
 </body>
 </html>
