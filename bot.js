@@ -75,7 +75,8 @@ class Bot {
 			}
 			return Array.from(urls);
 		}, jsonData['profile_card_selector']);
-
+		console.log("unique profile urls found: ");
+		console.log(groupProfileURLs.length);
 		return groupProfileURLs;
 	}
 
