@@ -20,22 +20,16 @@ First, clone the repository to your local machine using Git:
 git clone https://github.com/porterbmoody/facebook_profile_scraper.git
 cd facebook_profile_scraper
 ```
-### 2. Install Dependencies
-Navigate to the project directory and install the required dependencies:
-
-```sh
-npm install pupeteer
-```
-### 3. Initialize the Local Backend Server
+### 2. Initialize the Local Backend Server
 Open a terminal and run the following command to start the local backend server:
 
 ```sh
 node server.js
 ```
-### 4. Open the HTML Interface
+### 3. Open the HTML Interface
 Open the `public/index.html` file in your web browser. You can do this by simply double-clicking the file or opening it through your browser's menu.
 
-### 5. Input Credentials and Group URL
+### 4. Input Credentials and Group URL
 In the web interface:
 
 Enter your Facebook credentials.
