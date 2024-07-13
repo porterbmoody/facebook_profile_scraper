@@ -1,4 +1,4 @@
-const fs = require('fs').promises;
+const fs = require('fs');
 const puppeteer = require('puppeteer');
 const { parse } = require('json2csv');
 
@@ -36,11 +36,11 @@ async function login(page, jsonData) {
 async function scrapeGroupProfileURLs(page, jsonData) {
 	await page.goto(jsonData['group_url'], { waitUntil: 'networkidle2' });
 	await page.waitForSelector(jsonData['profile_card_selector'], { timeout: 10000 });
-    await page.evaluate(() => {
-        window.scrollBy(0, 1000);
-    });
-    await page.waitForTimeout(2000);
-
+    // await page.evaluate(() => {
+        // window.scrollBy(0, 1000);
+    // });
+    // await page.waitForTimeout(2000);
+	console.log('getting group profile urls');
 	const groupProfileURLs = await page.evaluate((selector) => {
 		const elements = document.querySelectorAll(selector);
 		const urls = [];
@@ -83,8 +83,8 @@ async function scrapeProfileData(page, jsonData, groupProfileURLs) {
 				return 'Not specified';
 			}, jsonData['other_detials']);
 			// console.log(marital_status);
-			console.log(`profile_name: ${profile_name}`);
-			console.log(`profile_url: ${profile_url}`);
+			// console.log(`profile_name: ${profile_name}`);
+			// console.log(`profile_url: ${profile_url}`);
 			profileData.push({ profile_name: profile_name, profile_url: profile_url, marital_status: marital_status }); 
 		} catch (error) {
 			console.error(`Error scraping profile: ${groupProfileURL}`, error);
@@ -106,8 +106,10 @@ async function saveToCsv(data) {
 
 async function runBot() {
 	try {
+		
 		await new Promise(resolve => setTimeout(resolve, 2000));
 		const jsonData = await readJsonFile();
+
 		const browser = await puppeteer.launch({
 			headless: false,
 			args: [
@@ -118,12 +120,15 @@ async function runBot() {
 		});
 		const page = await browser.newPage();
 		await login(page, jsonData);
+		
 		const groupProfileURLs = await scrapeGroupProfileURLs(page, jsonData);
-		// console.log(groupProfileURLs);
 		await scrapeProfileData(page, jsonData, groupProfileURLs);
 	
-		// await browser.close();
 	} catch (error) {
 		console.error('An error occurred:', error);
 	}
 }
+
+(async () => {
+	await runBot();
+})();

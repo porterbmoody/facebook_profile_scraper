@@ -26,16 +26,12 @@ app.post('/run-bot', async (req, res) => {
             console.log('Creating new meta_data.json file');
         }
 
-        // Update the data
         data.username = username;
         data.password = password;
         data.group_url = group_url;
 
         await fs.writeFile(filePath, JSON.stringify(data, null, 2));
 
-        console.log('meta_data.json updated. Now running the bot.');
-
-        // Execute the bot script
         exec('node bot.js', (error, stdout, stderr) => {
             if (error) {
                 console.error(`exec error: ${error}`);
