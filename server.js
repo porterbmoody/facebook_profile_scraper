@@ -57,7 +57,7 @@ app.post('/run-bot', async (req, res) => {
 });
 
 app.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}`);
+    // console.log(`Server running at http://localhost:${port}`);
 
     opn(`http://localhost:${port}`);
 });

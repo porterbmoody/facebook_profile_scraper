@@ -2,9 +2,12 @@ const fs = require('fs');
 const puppeteer = require('puppeteer');
 const { parse } = require('json2csv');
 
-
 function sleep(ms) {
 	return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function getRandomDelay(min, max) {
+    return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
 async function readJsonFile() {
@@ -21,13 +24,13 @@ async function readJsonFile() {
 
 async function login(page, jsonData) {
 	try {
-		console.log('loggin in...');
+		// console.log('loggin in...');
 		await page.goto('https://www.facebook.com/', { waitUntil: 'networkidle2' });
 		await page.type(jsonData['username_selector'], jsonData['username'], { delay: 30 });
 		await page.type(jsonData['password_selector'], jsonData['password'], { delay: 30 });
 		await page.click(jsonData['login_button']);
 		await page.waitForNavigation({ waitUntil: 'networkidle2' });
-		console.log('login successful');
+		// console.log('login successful');
 	} catch (error) {
 		console.error('Error logging in:', error);
 	}
@@ -55,7 +58,7 @@ async function scrapeGroupProfileURLs(page, jsonData) {
 		return Array.from(urls);
 	}, jsonData['profile_card_selector']);
 	
-	return groupProfileURLs.slice(0, 10);
+	return groupProfileURLs;
 }
 
 async function scrapeProfileData(page, jsonData, groupProfileURLs) {
@@ -64,6 +67,9 @@ async function scrapeProfileData(page, jsonData, groupProfileURLs) {
     
 	for (const groupProfileURL of groupProfileURLs) {
 		try {
+            const delay = getRandomDelay(3000, 5000);
+            console.log(`Waiting for ${delay / 1000} seconds before next profile...`);
+            await sleep(delay);
 			// console.log(`Visiting: ${groupProfileURL}`);
 			await page.goto(groupProfileURL, { waitUntil: 'networkidle2' });
 			await page.waitForSelector(jsonData['view_profile_selector'], { timeout: 10000 });
