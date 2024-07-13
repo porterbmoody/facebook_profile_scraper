@@ -45,16 +45,17 @@ async function scrapeGroupProfileURLs(page, jsonData) {
 	// console.log('getting group profile urls');
 	const groupProfileURLs = await page.evaluate((selector) => {
 		const elements = document.querySelectorAll(selector);
-		const urls = [];
+		const urls = new Set(); // Use a Set to store unique URLs
 		for (let i = 0; i < elements.length; i++) {
 			const href = elements[i].href;
 			if (href && href.includes('groups')) {
-				urls.push(href);
+				urls.add(href); // Add href to the Set
 			}
 		}
-		return urls;
+		return Array.from(urls);
 	}, jsonData['profile_card_selector']);
-	return groupProfileURLs.slice(0, 5);
+	
+	return groupProfileURLs.slice(0, 10);
 }
 
 async function scrapeProfileData(page, jsonData, groupProfileURLs) {
@@ -125,7 +126,9 @@ async function runBot() {
 		
 		const groupProfileURLs = await scrapeGroupProfileURLs(page, jsonData);
 		await scrapeProfileData(page, jsonData, groupProfileURLs);
-	
+
+		await browser.close();
+
 	} catch (error) {
 		console.error('An error occurred:', error);
 	}

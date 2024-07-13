@@ -10,6 +10,14 @@ const port = 3000;
 app.use(cors());
 app.use(express.json());
 
+// Serve static files from the current directory
+app.use(express.static(__dirname));
+
+// Serve index.html at the root URL
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
 app.post('/run-bot', async (req, res) => {
     const { username, password, group_url } = req.body;
     
