@@ -1,6 +1,12 @@
+const express = require('express');
+const cors = require('cors');
+const fs = require('fs').promises;
+const path = require('path');
 const puppeteer = require('puppeteer');
-const fs = require('fs');
 const { parse } = require('json2csv');
+
+const app = express();
+const port = 3000;
 
 function sleep(ms) {
 	return new Promise(resolve => setTimeout(resolve, ms));
@@ -57,6 +63,7 @@ async function scrapeGroupProfileURLs(page, jsonData) {
 async function scrapeProfileData(page, jsonData, groupProfileURLs) {
 	await page.waitForSelector(jsonData['profile_card_selector'], { timeout: 10000 });
 	const profileData = [];
+    
 	for (const groupProfileURL of groupProfileURLs) {
 		try {
 			// console.log(`Visiting: ${groupProfileURL}`);
@@ -102,7 +109,7 @@ async function saveToCsv(data) {
 	}
 }
 
-async function scrape() {
+async function runBot() {
 	try {
 		await new Promise(resolve => setTimeout(resolve, 2000));
 		const jsonData = await readJsonFile();
@@ -125,7 +132,3 @@ async function scrape() {
 		console.error('An error occurred:', error);
 	}
 }
-
-(async () => {
-	await scrape()
-})();

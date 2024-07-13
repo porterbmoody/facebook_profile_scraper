@@ -64,7 +64,7 @@
         async function runBot() {
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
-            const groupUrl = document.getElementById('group_url').value;
+            const group_url = document.getElementById('group_url').value;
 
             document.getElementById('result').innerText = 'Running the bot...';
 
@@ -74,7 +74,7 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ username, password, groupUrl })
+                    body: JSON.stringify({ username, password, group_url })
                 });
 
                 if (!response.ok) {
