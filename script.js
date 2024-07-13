@@ -1,22 +1,32 @@
-document.getElementById('scraper-form').addEventListener('submit', async (event) => {
-    event.preventDefault();
+const express = require('express');
+const bodyParser = require('body-parser');
+const { exec } = require('child_process');
+
+const app = express();
+app.use(bodyParser.json());
+app.use(express.static('public'));
+
+app.post('/start-scraping', (req, res) => {
+    const { email, password, groupUrl } = req.body;
     console.log('hello');
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-    const groupUrl = document.getElementById('group_url').value;
 
-    document.getElementById('result').innerText = 'Running the bot...';
-
-    const response = await fetch('/start-scraping', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ email, password, groupUrl })
-    });
-
-    const result = await response.json();
-    document.getElementById('result').innerText = result.message;
+    // exec(`node bot.js "${email}" "${password}" "${groupUrl}"`, (error, stdout, stderr) => {
+        // if (error) {
+            // console.error(`exec error: ${error}`);
+            // return res.status(500).send(`Error: ${error.message}`);
+        // }
+        // if (stderr) {
+            // console.error(`stderr: ${stderr}`);
+            // return res.status(500).send(`Error: ${stderr}`);
+        // }
+        // res.send(`Scraping completed. Output: ${stdout}`);
+    // });
 });
 
+app.listen(3000, () => {
+    console.log('Server is running on port 3000');
+});
 
+async function runBot() {
+
+}
