@@ -1,6 +1,6 @@
 # Facebook Profile Scraper
 
-This project is a bot that scrapes profile URLs from a specified Facebook group. 
+This is a bot that automatically scrapes and stores profile data from a specified Facebook group. 
 
 ## Prerequisites
 
