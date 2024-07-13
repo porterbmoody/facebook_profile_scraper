@@ -1,12 +1,7 @@
-const express = require('express');
-const cors = require('cors');
 const fs = require('fs').promises;
-const path = require('path');
 const puppeteer = require('puppeteer');
 const { parse } = require('json2csv');
 
-const app = express();
-const port = 3000;
 
 function sleep(ms) {
 	return new Promise(resolve => setTimeout(resolve, ms));
