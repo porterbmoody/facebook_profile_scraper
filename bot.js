@@ -36,11 +36,13 @@ async function login(page, jsonData) {
 async function scrapeGroupProfileURLs(page, jsonData) {
 	await page.goto(jsonData['group_url'], { waitUntil: 'networkidle2' });
 	await page.waitForSelector(jsonData['profile_card_selector'], { timeout: 10000 });
-    // await page.evaluate(() => {
-        // window.scrollBy(0, 1000);
-    // });
-    // await page.waitForTimeout(2000);
-	console.log('getting group profile urls');
+
+	await page.evaluate(() => {
+		window.scrollBy(0, 1000);
+	});
+	await new Promise(resolve => setTimeout(resolve, 2000));
+
+	// console.log('getting group profile urls');
 	const groupProfileURLs = await page.evaluate((selector) => {
 		const elements = document.querySelectorAll(selector);
 		const urls = [];
@@ -52,7 +54,7 @@ async function scrapeGroupProfileURLs(page, jsonData) {
 		}
 		return urls;
 	}, jsonData['profile_card_selector']);
-	return groupProfileURLs.slice(0, 3);
+	return groupProfileURLs.slice(0, 5);
 }
 
 async function scrapeProfileData(page, jsonData, groupProfileURLs) {
