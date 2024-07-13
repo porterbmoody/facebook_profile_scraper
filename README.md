@@ -33,12 +33,5 @@ In the web interface:
 
 Enter your Facebook credentials.
 Input the Facebook group URL from which you want to scrape profiles.
-Click the *Submit* button.
-The bot should start running automatically, logging in to Facebook, navigating to the specified group, and scraping profile URLs.
-
-Troubleshooting
-If you encounter any issues, make sure to:
-
-Verify that your credentials and group URL are correct.
-Ensure that the backend server is running.
-Check the browser console and terminal for error messages and logs.
+Click the *Run Bot* button.
+The bot will then start automatically, logging in to Facebook, navigating to the specified group, going to each profile url and scraping the using your local chrome browser.
