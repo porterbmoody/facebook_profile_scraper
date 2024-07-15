@@ -96,7 +96,7 @@ class Bot {
 				await this.page.waitForSelector(jsonData['profile_name_selector_group_profiles'], { timeout: 5000 });
 				const profile_name = await this.page.$eval(jsonData['profile_name_selector_group_profiles'], element => element.textContent.trim());
 
-				await this.page.waitForSelector(jsonData['other_detials'], { timeout: 5000 });
+				await this.page.waitForSelector(jsonData['other_details'], { timeout: 5000 });
 
 				const marital_status = await this.page.evaluate((selector) => {
 					const elements = document.querySelectorAll(selector);
@@ -107,7 +107,7 @@ class Bot {
 						}
 					}
 					return 'Not specified';
-				}, jsonData['other_detials']);
+				}, jsonData['other_details']);
 
 				profileData.push({ profile_name: profile_name, profile_url: profile_url, marital_status: marital_status });
 			} catch (error) {

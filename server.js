@@ -8,6 +8,8 @@ const opn = require('opn');
 const app = express();
 const port = 3000;
 
+process.chdir(path.dirname(process.execPath));
+
 app.use(cors());
 app.use(express.json());
 
