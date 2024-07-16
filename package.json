@@ -1,9 +1,9 @@
 {
-  "name": "your-project-name",
+  "name": "facebook-profile-scraper",
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
-      "start": "node server.js"
+    "start": "node server.js"
   },
   "dependencies": {
     "cors": "^2.8.5",
@@ -12,5 +12,8 @@
     "open": "^10.1.0",
     "opn": "^6.0.0",
     "puppeteer": "^22.13.0"
+  },
+  "bin": {
+    "facebook-profile-scraper": "./server.js"
   }
 }

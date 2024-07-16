@@ -59,14 +59,16 @@
 </head>
 <body>
     <div class="container">
-        <h1>Facebook Group Scrape Bot</h1>
+        <h1>Facebook group scrape bot</h1>
         <form id="scraper-form">
-            <label for="username">username:</label>
+            <label for="username">Username:</label>
             <input type="username" id="username" name="username" value="porterbmoody@gmail.com" required>
             <label for="password">Password:</label>
             <input type="password" id="password" name="password" value="" required>
-            <label for="group_url">Facebook Group URL:</label>
+            <label for="group_url">Facebook group url:</label>
             <input type="url" id="group_url" name="group_url" value="https://www.facebook.com/groups/344194813025772/members/" required>
+            <label for="number_of_hours">Number of hours bot will run:</label>
+            <input type="number" id="number_of_hours" name="number_of_hours" value="24" required>
             <button type="button" onclick="runBot()">Run Bot</button>
         </form>
         <div id="result"></div>
@@ -76,6 +78,7 @@
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             const group_url = document.getElementById('group_url').value;
+            const number_of_hours = document.getElementById('number_of_hours').value;
 
             document.getElementById('result').innerText = 'Running the bot...';
 
@@ -85,7 +88,7 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ username, password, group_url })
+                    body: JSON.stringify({ username, password, group_url, number_of_hours })
                 });
 
                 if (!response.ok) {
