@@ -119,7 +119,7 @@ class Bot {
     
                 profileData.push({ profile_name: profile_name, profile_url: profile_url, marital_status: marital_status });
             } catch (error) {
-                console.error(`Error scraping profile: ${groupProfileURL}`, error);
+                console.error('Error scraping profile: ${groupProfileURL}, error');
             }
         }
     
