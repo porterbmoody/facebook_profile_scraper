@@ -136,12 +136,13 @@ class Bot {
         }
     }
 
-    async runBot(username, password, group_url, time_between) {
+    async runBot(username, password, group_url, time_between, chrome_path) {
         try {
             await new Promise(resolve => setTimeout(resolve, 2000));
-
+    
             this.browser = await puppeteer.launch({
                 headless: false,
+                executablePath: chrome_path,
                 args: [
                     '--no-sandbox',
                     '--disable-setuid-sandbox',
@@ -150,18 +151,18 @@ class Bot {
             });
             this.page = await this.browser.newPage();
             await this.login(username, password);
-
+    
             await this.scrapeProfileData(time_between, group_url);
-
+    
         } catch (error) {
             console.error('An error occurred:', error);
+        } finally {
+            if (this.browser) {
+                await this.browser.close();
+            }
         }
-        this.browser.close(); //finally {
-            // if (this.browser) {
-                // await 
-            // }
-        // }
     }
+    
 }
 
 app.get('/', (req, res) => {

@@ -62,14 +62,16 @@
         <h1>Facebook group scrape bot</h1>
         <form id="scraper-form">
             <label for="username">Username:</label>
-            <input type="username" id="username" name="username" value="" required>
+            <input type="username" id="username" name="username" value="+15125531143" required>
             <label for="password">Password:</label>
-            <input type="password" id="password" name="password" value="" required>
+            <input type="password" id="password" name="password" value="Porter2024" required>
             <label for="group_url">Facebook group url (make sure to go to the members tab):</label>
-            <input type="url" id="group_url" name="group_url" value="" required>
+            <input type="url" id="group_url" name="group_url" value="https://www.facebook.com/groups/154200679849423/members/" required>
             <label for="time_between">Minutes between profile scrapes:</label>
             <input type="number" id="time_between" name="time_between" value=".01" required>
-            <button type="button" onclick="runBot()">Run Bot</button>
+            <label for="chrome_path">Chrome path:</label>
+            <input type="number" id="chrome_path" name="chrome_path" value="" required>
+            <button type="path" onclick="runBot()">Run Bot</button>
         </form>
         <div id="result"></div>
     </div>
@@ -80,6 +82,7 @@
             const password = document.getElementById('password').value;
             const group_url = document.getElementById('group_url').value;
             const time_between = document.getElementById('time_between').value;
+            const chrome_path = document.getElementById('chrome_path').value;
 
             document.getElementById('result').innerText = 'Running the bot...';
 
@@ -89,7 +92,7 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ username, password, group_url, time_between })
+                    body: JSON.stringify({ username, password, group_url, time_between, chrome_path })
                 });
 
                 if (!response.ok) {

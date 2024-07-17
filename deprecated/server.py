@@ -1,3 +1,6 @@
+# pkg . --targets node18-win-x64 --output bot.exe --public
+
+
 from flask import Flask, request, send_from_directory, jsonify
 import json
 import os
