@@ -62,23 +62,24 @@
         <h1>Facebook group scrape bot</h1>
         <form id="scraper-form">
             <label for="username">Username:</label>
-            <input type="username" id="username" name="username" value="porterbmoody@gmail.com" required>
+            <input type="username" id="username" name="username" value="" required>
             <label for="password">Password:</label>
             <input type="password" id="password" name="password" value="" required>
             <label for="group_url">Facebook group url (make sure to go to the members tab):</label>
-            <input type="url" id="group_url" name="group_url" value="https://www.facebook.com/groups/154200679849423/members/" required>
-            <label for="number_of_hours">Number of hours bot will run:</label>
-            <input type="number" id="number_of_hours" name="number_of_hours" value=".01" required>
+            <input type="url" id="group_url" name="group_url" value="" required>
+            <label for="time_between">Minutes between profile scrapes:</label>
+            <input type="number" id="time_between" name="time_between" value=".01" required>
             <button type="button" onclick="runBot()">Run Bot</button>
         </form>
         <div id="result"></div>
     </div>
+    <!-- porterbmoody@gmail.com https://www.facebook.com/groups/154200679849423/members/ -->
     <script>
         async function runBot() {
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             const group_url = document.getElementById('group_url').value;
-            const number_of_hours = document.getElementById('number_of_hours').value;
+            const time_between = document.getElementById('time_between').value;
 
             document.getElementById('result').innerText = 'Running the bot...';
 
@@ -88,7 +89,7 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ username, password, group_url, number_of_hours })
+                    body: JSON.stringify({ username, password, group_url, time_between })
                 });
 
                 if (!response.ok) {
