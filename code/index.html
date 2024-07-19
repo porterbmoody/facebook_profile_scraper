@@ -84,17 +84,17 @@
             const password = document.getElementById('password').value;
             const group_url = document.getElementById('group_url').value;
             const time_between = document.getElementById('time_between').value;
-            const chrome_path = document.getElementById('chrome_path').value;
+            // const chrome_path = document.getElementById('chrome_path').value;
 
             document.getElementById('result').innerText = 'Running the bot...';
-
+            console.log('submitting inputs...')
             try {
                 const response = await fetch('http://localhost:3000/run-bot', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ username, password, group_url, time_between, chrome_path })
+                    body: JSON.stringify({ username, password, group_url, time_between })
                 });
 
                 if (!response.ok) {

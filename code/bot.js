@@ -136,13 +136,12 @@ class Bot {
         }
     }
 
-    async runBot(username, password, group_url, time_between, chrome_path) {
+    async runBot(username, password, group_url, time_between) {
         try {
             await new Promise(resolve => setTimeout(resolve, 2000));
     
             this.browser = await puppeteer.launch({
                 headless: false,
-                executablePath: chrome_path,
                 args: [
                     '--no-sandbox',
                     '--disable-setuid-sandbox',
@@ -162,7 +161,7 @@ class Bot {
             }
         }
     }
-    
+
 }
 
 app.get('/', (req, res) => {
@@ -172,7 +171,7 @@ app.get('/', (req, res) => {
 app.post('/run-bot', async (req, res) => {
     const { username, password, group_url, time_between } = req.body;
 
-    console.log('Received request to run bot with:', { username, password, group_url, time_between, hours });
+    console.log('Received request to run bot with:', { username, password, group_url, time_between });
 
     try {
         const bot = new Bot();
