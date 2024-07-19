@@ -68,7 +68,7 @@
             <label for="group_url">Facebook group url (make sure to go to the members tab):</label>
             <input type="url" id="group_url" name="group_url" value="https://www.facebook.com/groups/154200679849423/members/" required>
             <label for="time_between">Minutes between profile scrapes:</label>
-            <input type="number" id="time_between" name="time_between" value=".01" required>
+            <input type="number" id="time_between" name="time_between" value="1" min="0" step="1" required>
             <label for="chrome_path">Chrome path:</label>
             <input type="chrome_path" id="chrome_path" name="chrome_path" value="C:/Program Files/Google/Chrome/Application/chrome.exe" required>
             <button type="path" onclick="runBot()">Run Bot</button>
