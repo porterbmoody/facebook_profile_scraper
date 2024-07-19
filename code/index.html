@@ -53,7 +53,7 @@
         }
         #result {
             margin-top: 1rem;
-            color: #a0a0a0; /* Slightly muted color for results */
+            color: #a0a0a0;
         }
     </style>
 </head>
@@ -69,8 +69,10 @@
             <input type="url" id="group_url" name="group_url" value="https://www.facebook.com/groups/154200679849423/members/" required>
             <label for="time_between">Minutes between profile scrapes:</label>
             <input type="number" id="time_between" name="time_between" value="1" min="0" step="1" required>
-            <label for="chrome_path">Chrome path:</label>
-            <input type="chrome_path" id="chrome_path" name="chrome_path" value="C:/Program Files/Google/Chrome/Application/chrome.exe" required>
+            <!-- <label for="hours">Number of hours bot will run:</label> -->
+            <!-- <input type="number" id="hours" name="hours" value=".01" required> -->
+            <!-- <label for="chrome_path">Chrome path:</label> -->
+            <!-- <input type="chrome_path" id="chrome_path" name="chrome_path" value="C:/Program Files/Google/Chrome/Application/chrome.exe" required> -->
             <button type="path" onclick="runBot()">Run Bot</button>
         </form>
         <div id="result"></div>

@@ -172,7 +172,7 @@ app.get('/', (req, res) => {
 app.post('/run-bot', async (req, res) => {
     const { username, password, group_url, time_between } = req.body;
 
-    console.log('Received request to run bot with:', { username, password, group_url, time_between });
+    console.log('Received request to run bot with:', { username, password, group_url, time_between, hours });
 
     try {
         const bot = new Bot();
