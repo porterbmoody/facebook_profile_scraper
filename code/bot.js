@@ -123,10 +123,10 @@ class Bot {
             }
         }
     
-        await this.saveToCsv(profileData);
+        await this.updateCSV(profileData);
     }
 
-    async saveToCsv(data) {
+    async updateCSV(data) {
         try {
             const csv = parse(data);
             await fs.writeFile('profile_data.csv', csv);
@@ -151,9 +151,9 @@ class Bot {
             });
             this.page = await this.browser.newPage();
             await this.login(username, password);
-    
+
             await this.scrapeProfileData(time_between, group_url);
-    
+
         } catch (error) {
             console.error('An error occurred:', error);
         } finally {
