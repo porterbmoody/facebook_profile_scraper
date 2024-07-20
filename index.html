@@ -12,15 +12,15 @@
             align-items: center;
             height: 100vh;
             margin: 0;
-            background: #121212; /* Dark background */
-            color: #e0e0e0; /* Light text color for better contrast */
+            background: #121212;
+            color: #e0e0e0;
         }
         .container {
             text-align: center;
-            background: #1e1e1e; /* Darker grey for container */
+            background: #1e1e1e;
             padding: 2rem;
             border-radius: 8px;
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.1); /* Lighter shadow for dark mode */
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
         }
         form {
             display: flex;
@@ -31,18 +31,18 @@
             padding: 0.5rem;
             font-size: 1rem;
             width: 100%;
-            background: #2c2c2c; /* Dark input background */
-            color: #e0e0e0; /* Light text color */
-            border: 1px solid #444; /* Subtle border */
+            background: #2c2c2c;
+            color: #e0e0e0;
+            border: 1px solid #444;
             border-radius: 4px;
         }
         input:focus {
             outline: none;
-            border-color: #007bff; /* Highlight color on focus */
+            border-color: #007bff;
         }
         button {
             background: #007bff;
-            color: #ffffff; /* White text for button */
+            color: #ffffff;
             border: none;
             border-radius: 4px;
             cursor: pointer;
@@ -59,35 +59,30 @@
 </head>
 <body>
     <div class="container">
-        <h1>Facebook group scrape bot</h1>
-        <form id="scraper-form">
+        <h1>Facebook Group Scrape Bot</h1>
+        <form id="scraper-form" onsubmit="event.preventDefault(); runBot();">
             <label for="username">Username:</label>
-            <input type="username" id="username" name="username" value="porterbmoody@gmail.com" required>
+            <input type="email" id="username" name="username" required>
             <label for="password">Password:</label>
-            <input type="password" id="password" name="password" value="" required>
-            <label for="group_url">Facebook group url (make sure to go to the members tab):</label>
-            <input type="url" id="group_url" name="group_url" value="https://www.facebook.com/groups/154200679849423/members/" required>
-            <label for="time_between">Minutes between profile scrapes:</label>
-            <input type="float" id="time_between" name="time_between" value=".1" min="0" step="1" required>
-            <!-- <label for="hours">Number of hours bot will run:</label> -->
-            <!-- <input type="number" id="hours" name="hours" value=".01" required> -->
-            <!-- <label for="chrome_path">Chrome path:</label> -->
-            <!-- <input type="chrome_path" id="chrome_path" name="chrome_path" value="C:/Program Files/Google/Chrome/Application/chrome.exe" required> -->
-            <button type="path" onclick="runBot()">Run Bot</button>
+            <input type="password" id="password" name="password" required>
+            <label for="group_url">Facebook Group URL (Members Tab):</label>
+            <input type="url" id="group_url" name="group_url" required pattern="https://.*">
+            <label for="time_between">Minutes Between Profile Scrapes:</label>
+            <input type="number" id="time_between" name="time_between" value="0.1" min="0" step="0.1" required>
+            <button type="submit">Run Bot</button>
         </form>
         <div id="result"></div>
     </div>
-    <!-- porterbmoody@gmail.com https://www.facebook.com/groups/154200679849423/members/  pkg . --targets node18-win-x64 --output ../bot.exe --public git add .; git commit -m 'changes'; git pull; git push;-->
     <script>
         async function runBot() {
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             const group_url = document.getElementById('group_url').value;
             const time_between = document.getElementById('time_between').value;
-            // const hours = document.getElementById('hours').value;
 
             document.getElementById('result').innerText = 'Running the bot...';
-            console.log('submitting inputs...')
+            document.getElementById('result').style.color = '#a0a0a0';
+
             try {
                 const response = await fetch('http://localhost:3000/run-bot', {
                     method: 'POST',
@@ -103,8 +98,10 @@
 
                 const result = await response.text();
                 document.getElementById('result').innerText = result;
+                document.getElementById('result').style.color = '#00ff00';
             } catch (error) {
                 document.getElementById('result').innerText = 'Error: ' + error.message;
+                document.getElementById('result').style.color = '#ff0000';
             }
         }
     </script>
