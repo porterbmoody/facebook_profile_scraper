@@ -4,14 +4,22 @@ const path = require('path');
 const opn = require('opn');
 const puppeteer = require('puppeteer');
 const { parse } = require('json2csv');
-// const { parse } = require('csv-stringify/sync');
-// const { parse: parseCSV } = require('csv-parse/sync');
 
 const app = express();
 const port = 3000;
 
 app.use(express.json());
 app.use(express.static(__dirname));
+
+const SELECTORS = {
+    EMAIL_INPUT: "[aria-label='Email or phone number']",
+    PASSWORD_INPUT: "[aria-label='Password']",
+    LOGIN_BUTTON: "[name='login']",
+    GROUP_MEMBERS: "[class='x1i10hfl xjbqb8w x1ejq31n xd10rxx x1sy0etr x17r0tee x972fbf xcfux6l x1qhh985 xm0m39n x9f619 x1ypdohk xt0psk2 xe8uvvx xdj266r x11i5rnm xat24cr x1mh8g0r xexx8yu x4uap5 x18d9i69 xkhd6sd x16tdsg8 x1hl2dhg xggy1nq x1a2a7pz x1sur9pj xkrqix3 xzsf02u x1s688f']",
+    PROFILE_URL: "[aria-label='View profile']",
+    PROFILE_NAME: "[class='x193iq5w xeuugli x13faqbe x1vvkbs x1xmvt09 x1lliihq x1s928wv xhkezso x1gmr53x x1cpjm7i x1fgarty x1943h6x x14qwyeo xw06pyt x579bpy xjkpybl x1xlr1w8 xzsf02u x2b8uid']",
+    MARITAL_STATUS: "[class='x193iq5w xeuugli x13faqbe x1vvkbs x1xmvt09 x1lliihq x1s928wv xhkezso x1gmr53x x1cpjm7i x1fgarty x1943h6x xudqn12 x3x7a5m x1f6kntn xvq8zen xo1l8bm xzsf02u x1yc453h']"
+};
 
 class Bot {
     constructor(response) {
@@ -56,9 +64,9 @@ class Bot {
     async login() {
         try {
             await this.page.goto("https://www.facebook.com/", { waitUntil: 'networkidle2' });
-            await this.page.type("[aria-label='Email or phone number']", this.response_data['username'], { delay: 30 });
-            await this.page.type("[aria-label='Password']", this.response_data['password'], { delay: 30 });
-            await this.page.click("[name='login']");
+            await this.page.type(SELECTORS.EMAIL_INPUT, this.response_data['username'], { delay: 30 });
+            await this.page.type(SELECTORS.PASSWORD_INPUT, this.response_data['password'], { delay: 30 });
+            await this.page.click(SELECTORS.LOGIN_BUTTON);
             await this.page.waitForNavigation({ waitUntil: 'networkidle2' });
         } catch (error) {
             console.error('Error logging in:', error);
@@ -66,14 +74,11 @@ class Bot {
     }
 
     async scrapeGroupProfileURLs() {
-        console.log(`opening group url ${this.response_data['group_url']}`);
+        console.log(`Opening group URL ${this.response_data['group_url']}`);
         await this.page.goto(this.response_data['group_url'], { waitUntil: 'networkidle2' });
-        await this.page.waitForSelector("[class='x1i10hfl xjbqb8w x1ejq31n xd10rxx x1sy0etr x17r0tee x972fbf xcfux6l x1qhh985 xm0m39n x9f619 x1ypdohk xt0psk2 xe8uvvx xdj266r x11i5rnm xat24cr x1mh8g0r xexx8yu x4uap5 x18d9i69 xkhd6sd x16tdsg8 x1hl2dhg xggy1nq x1a2a7pz x1sur9pj xkrqix3 xzsf02u x1s688f']", { timeout: 10000 });
-        // await this.autoScroll();
-        // await this.sleep(2000);
-        // await this.autoScroll();
-        // await this.sleep(2000);
-        // await this.autoScroll();
+        await this.page.waitForSelector(SELECTORS.GROUP_MEMBERS, { timeout: 10000 });
+        await this.autoScroll();
+        await this.sleep(2000);
 
         const groupProfileURLs = await this.page.evaluate((selector) => {
             const elements = document.querySelectorAll(selector);
@@ -85,53 +90,51 @@ class Bot {
                 }
             });
             return Array.from(urls);
-        }, "[class='x1i10hfl xjbqb8w x1ejq31n xd10rxx x1sy0etr x17r0tee x972fbf xcfux6l x1qhh985 xm0m39n x9f619 x1ypdohk xt0psk2 xe8uvvx xdj266r x11i5rnm xat24cr x1mh8g0r xexx8yu x4uap5 x18d9i69 xkhd6sd x16tdsg8 x1hl2dhg xggy1nq x1a2a7pz x1sur9pj xkrqix3 xzsf02u x1s688f']");
+        }, SELECTORS.GROUP_MEMBERS);
     
         return groupProfileURLs;
     }
 
     async scrapeProfileData() {
         const groupProfileURLs = await this.scrapeGroupProfileURLs();
-        // const totalProfiles = groupProfileURLs.length;
-        // const totalSecondsInDay = this.response_data['time_between'] * 60 * 60;
-        // const delayBetweenProfiles = totalSecondsInDay / totalProfiles * 1000;
-        console.log("Unique profile URLs to scrape:");
-        console.log(groupProfileURLs.length);
-        await this.page.waitForSelector("[class='x1i10hfl xjbqb8w x1ejq31n xd10rxx x1sy0etr x17r0tee x972fbf xcfux6l x1qhh985 xm0m39n x9f619 x1ypdohk xt0psk2 xe8uvvx xdj266r x11i5rnm xat24cr x1mh8g0r xexx8yu x4uap5 x18d9i69 xkhd6sd x16tdsg8 x1hl2dhg xggy1nq x1a2a7pz x1sur9pj xkrqix3 xzsf02u x1s688f']", { timeout: 10000 });
+        console.log("Unique profile URLs to scrape:", groupProfileURLs.length);
         this.scrapedData = [];
     
         for (const groupProfileURL of groupProfileURLs) {
             try {
-                // console.log(`Waiting for ${delayBetweenProfiles / 1000} seconds before next profile...`);
                 console.log(`Waiting for ${this.response_data['time_between']} seconds before next profile...`);
-                await this.sleep(this.response_data['time_between']);
+                await this.sleep(this.response_data['time_between'] * 1000);
     
                 await this.page.goto(groupProfileURL, { waitUntil: 'networkidle2' });
-                await this.page.waitForSelector("[aria-label='View profile']", { timeout: 10000 });
+                await this.page.waitForSelector(SELECTORS.PROFILE_URL, { timeout: 10000 });
     
-                const profile_url = await this.page.$eval("[aria-label='View profile']", element => element.href);
+                const profile_url = await this.page.$eval(SELECTORS.PROFILE_URL, element => element.href);
                 await this.page.goto(profile_url, { waitUntil: 'networkidle2' });
-                await this.page.waitForSelector("[class='x193iq5w xeuugli x13faqbe x1vvkbs x1xmvt09 x1lliihq x1s928wv xhkezso x1gmr53x x1cpjm7i x1fgarty x1943h6x x14qwyeo xw06pyt x579bpy xjkpybl x1xlr1w8 xzsf02u x2b8uid']", { timeout: 5000 });
+                await this.page.waitForSelector(SELECTORS.PROFILE_NAME, { timeout: 5000 });
 
-                const profile_name = await this.page.$eval("[class='x193iq5w xeuugli x13faqbe x1vvkbs x1xmvt09 x1lliihq x1s928wv xhkezso x1gmr53x x1cpjm7i x1fgarty x1943h6x x14qwyeo xw06pyt x579bpy xjkpybl x1xlr1w8 xzsf02u x2b8uid']", element => element.textContent.trim());
-                console.log(`scraping...${profile_name}`);
-                await this.page.waitForSelector("[class='x193iq5w xeuugli x13faqbe x1vvkbs x1xmvt09 x1lliihq x1s928wv xhkezso x1gmr53x x1cpjm7i x1fgarty x1943h6x xudqn12 x3x7a5m x1f6kntn xvq8zen xo1l8bm xzsf02u x1yc453h']", { timeout: 5000 });
+                const profile_name = await this.page.$eval(SELECTORS.PROFILE_NAME, element => element.textContent.trim());
+                console.log(`Scraping...${profile_name}`);
+                await this.page.waitForSelector(SELECTORS.MARITAL_STATUS, { timeout: 5000 });
     
                 const marital_status = await this.page.evaluate((selector) => {
                     const elements = document.querySelectorAll(selector);
                     for (let element of elements) {
                         const text = element.textContent.trim().toLowerCase();
                         if (text.includes('married')) {
-                            return text;
+                            return 'Married';
+                        } else if (text.includes('single')) {
+                            return 'Single';
                         }
                     }
                     return 'Not specified';
-                }, "[class='x193iq5w xeuugli x13faqbe x1vvkbs x1xmvt09 x1lliihq x1s928wv xhkezso x1gmr53x x1cpjm7i x1fgarty x1943h6x xudqn12 x3x7a5m x1f6kntn xvq8zen xo1l8bm xzsf02u x1yc453h']");
-                const new_row = { profile_name: profile_name, marital_status: marital_status, profile_url: profile_url };
+                }, SELECTORS.MARITAL_STATUS);
+                
+
+                const new_row = { profile_name, marital_status, profile_url };
                 this.scrapedData.push(new_row);
                 await this.updateCSV();
             } catch (error) {
-                console.error(`Error scraping profile: ${groupProfileURL}, error`);
+                console.error(`Error scraping profile: ${groupProfileURL}`, error);
             }
         }
     }
@@ -148,8 +151,7 @@ class Bot {
 
     async runBot() {
         try {
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            console.log(`starting puppeteer...`);
+            console.log(`Starting Puppeteer...`);
             this.browser = await puppeteer.launch({
                 headless: false,
                 args: [
@@ -158,13 +160,11 @@ class Bot {
                     '--disable-notifications'
                 ]
             });
-            console.log(`opening browser`);
+            console.log(`Opening browser...`);
             this.page = await this.browser.newPage();
-            console.log(`logging in`);
+            console.log(`Logging in...`);
             await this.login();
-
             await this.scrapeProfileData();
-
         } catch (error) {
             console.error('An error occurred:', error);
         } finally {
@@ -173,7 +173,6 @@ class Bot {
             }
         }
     }
-
 }
 
 app.get('/', (req, res) => {
@@ -181,7 +180,6 @@ app.get('/', (req, res) => {
 });
 
 app.post('/run-bot', async (req, res) => {
-
     try {
         const bot = new Bot(req.body);
         await bot.runBot();
