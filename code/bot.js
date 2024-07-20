@@ -44,11 +44,11 @@ class Bot {
         });
     }
 
-    async login(username, password) {
+    async login() {
         try {
             await this.page.goto("https://www.facebook.com/", { waitUntil: 'networkidle2' });
-            await this.page.type("[aria-label='Email or phone number']", username, { delay: 30 });
-            await this.page.type("[aria-label='Password']", password, { delay: 30 });
+            await this.page.type("[aria-label='Email or phone number']", this.username, { delay: 30 });
+            await this.page.type("[aria-label='Password']", this.password, { delay: 30 });
             await this.page.click("[name='login']");
             await this.page.waitForNavigation({ waitUntil: 'networkidle2' });
         } catch (error) {
@@ -56,8 +56,8 @@ class Bot {
         }
     }
 
-    async scrapeGroupProfileURLs(group_url) {
-        await this.page.goto(group_url, { waitUntil: 'networkidle2' });
+    async scrapeGroupProfileURLs() {
+        await this.page.goto(this.group_url, { waitUntil: 'networkidle2' });
         await this.page.waitForSelector("[class='x1i10hfl xjbqb8w x1ejq31n xd10rxx x1sy0etr x17r0tee x972fbf xcfux6l x1qhh985 xm0m39n x9f619 x1ypdohk xt0psk2 xe8uvvx xdj266r x11i5rnm xat24cr x1mh8g0r xexx8yu x4uap5 x18d9i69 xkhd6sd x16tdsg8 x1hl2dhg xggy1nq x1a2a7pz x1sur9pj xkrqix3 xzsf02u x1s688f']", { timeout: 10000 });
         await this.autoScroll();
         await this.sleep(2000);
@@ -80,10 +80,10 @@ class Bot {
         return groupProfileURLs;
     }
 
-    async scrapeProfileData(time_between, group_url) {
-        const groupProfileURLs = await this.scrapeGroupProfileURLs(group_url);
+    async scrapeProfileData() {
+        const groupProfileURLs = await this.scrapeGroupProfileURLs();
         const totalProfiles = groupProfileURLs.length;
-        const totalSecondsInDay = time_between * 60 * 60;
+        const totalSecondsInDay = this.time_between * 60 * 60;
         const delayBetweenProfiles = totalSecondsInDay / totalProfiles * 1000;
         console.log("Unique profile URLs to scrape:");
         console.log(groupProfileURLs.length);
@@ -137,6 +137,10 @@ class Bot {
     }
 
     async runBot(username, password, group_url, time_between) {
+        this.username = username;
+        this.password = password;
+        this.group_url = group_url;
+        this.time_between = time_between;
         try {
             await new Promise(resolve => setTimeout(resolve, 2000));
     
@@ -149,7 +153,7 @@ class Bot {
                 ]
             });
             this.page = await this.browser.newPage();
-            await this.login(username, password);
+            await this.login();
 
             await this.scrapeProfileData(time_between, group_url);
 
@@ -171,11 +175,11 @@ app.get('/', (req, res) => {
 app.post('/run-bot', async (req, res) => {
     const { username, password, group_url, time_between } = req.body;
 
-    console.log('Received request to run bot with:', { username, password, group_url, time_between });
+    console.log('Received request to run bot with:', { username, password, group_url, time_between, hours });
 
     try {
         const bot = new Bot();
-        await bot.runBot(username, password, group_url, time_between);
+        await bot.runBot(username, password, group_url, time_between, hours);
         res.send('Bot execution completed successfully!');
     } catch (error) {
         console.error('Error running bot:', error);
