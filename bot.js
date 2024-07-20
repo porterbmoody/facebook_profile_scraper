@@ -77,8 +77,8 @@ class Bot {
         console.log(`Opening group URL ${this.response_data['group_url']}`);
         await this.page.goto(this.response_data['group_url'], { waitUntil: 'networkidle2' });
         await this.page.waitForSelector(SELECTORS.GROUP_MEMBERS, { timeout: 10000 });
-        await this.autoScroll();
-        await this.sleep(2000);
+        // await this.autoScroll();
+        // await this.sleep(2000);
 
         const groupProfileURLs = await this.page.evaluate((selector) => {
             const elements = document.querySelectorAll(selector);
@@ -128,7 +128,6 @@ class Bot {
                     }
                     return 'Not specified';
                 }, SELECTORS.MARITAL_STATUS);
-                
 
                 const new_row = { profile_name, marital_status, profile_url };
                 this.scrapedData.push(new_row);
