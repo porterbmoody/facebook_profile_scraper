@@ -2,7 +2,7 @@
 
 This is a bot that automatically scrapes and stores profile data from a specified Facebook group. 
 
-![](facebook%20page.PNG)
+![](images/facebook%20page.PNG)
 
 ## Prerequisites
 ```
