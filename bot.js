@@ -117,16 +117,21 @@ class Bot {
                 await this.page.waitForSelector(SELECTORS.MARITAL_STATUS, { timeout: 5000 });
     
                 const marital_status = await this.page.evaluate((selector) => {
-                    const elements = document.querySelectorAll(selector);
-                    for (let element of elements) {
-                        const text = element.textContent.trim().toLowerCase();
-                        if (text.includes('married')) {
-                            return 'Married';
-                        } else if (text.includes('single')) {
-                            return 'Single';
+                    try {
+                        const elements = document.querySelectorAll(selector);
+                        for (let element of elements) {
+                            const text = element.textContent.trim().toLowerCase();
+                            if (text.includes('married')) {
+                                return 'Married';
+                            } else if (text.includes('single')) {
+                                return 'Single';
+                            }
                         }
+                        return 'Not specified';
+                    } catch (error) {
+                        console.error('Error evaluating marital status:', error);
+                        return 'Error retrieving status';
                     }
-                    return 'Not specified';
                 }, SELECTORS.MARITAL_STATUS);
 
                 const new_row = { profile_name, marital_status, profile_url };
@@ -136,6 +141,21 @@ class Bot {
                 console.error(`Error scraping profile: ${groupProfileURL}`, error);
             }
         }
+    }
+
+    async openBrowser() {
+        console.log(`Starting Puppeteer...`);
+        this.browser = await puppeteer.launch({
+            headless: false,
+            args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-notifications'
+            ]
+        });
+        console.log(`Opening browser...`);
+        this.page = await this.browser.newPage();
+        console.log(`Logging in...`);
     }
 
     async updateCSV() {
@@ -150,18 +170,7 @@ class Bot {
 
     async runBot() {
         try {
-            console.log(`Starting Puppeteer...`);
-            this.browser = await puppeteer.launch({
-                headless: false,
-                args: [
-                    '--no-sandbox',
-                    '--disable-setuid-sandbox',
-                    '--disable-notifications'
-                ]
-            });
-            console.log(`Opening browser...`);
-            this.page = await this.browser.newPage();
-            console.log(`Logging in...`);
+            await this.openBrowser();
             await this.login();
             await this.scrapeProfileData();
         } catch (error) {
