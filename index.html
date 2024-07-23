@@ -60,18 +60,20 @@
 <body>
     <div class="container">
         <h1>Facebook Group Scrape Bot</h1>
-        <form id="scraper-form" onsubmit="event.preventDefault(); runBot();">
+        <form id="scraper-form" onsubmit="runBot();">
             <label for="username">Username:</label>
-            <input type="username" id="username" name="username" required>
+            <input type="text" id="username" name="username" required>
             <label for="password">Password:</label>
             <input type="password" id="password" name="password" required>
             <label for="group_url">Facebook Group URL (Members Tab):</label>
-            <input type="url" id="group_url" name="group_url" >
-            <!-- required pattern="https://.*" -->
-            <label for="time_between">Minutes Between Profile Scrapes:</label>
-            <input type="number" id="time_between" name="time_between" value="1" min="0" step="1">
+            <input type="url" id="group_url" name="group_url" value="https://www.facebook.com/groups/344194813025772/members/">
+            <label for="profiles_to_scrape">Number of Profiles to Scrape:</label>
+            <input type="number" id="profiles_to_scrape" name="profiles_to_scrape" value="1" min="0" step="1">
+            <label for="hours_to_scrape">Number of Hours:</label>
+            <input type="number" id="hours_to_scrape" name="hours_to_scrape" value="1" min=".01" step="1">
             <button type="submit">Run Bot</button>
         </form>
+        
         <div id="result"></div>
     </div>
     <script>
@@ -79,8 +81,9 @@
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             const group_url = document.getElementById('group_url').value;
-            const time_between = document.getElementById('time_between').value;
-
+            const profiles_to_scrape = document.getElementById('profiles_to_scrape').value;
+            const hours_to_scrape = document.getElementById('hours_to_scrape').value;
+            console.log('runbot');
             document.getElementById('result').innerText = 'Running the bot...';
             document.getElementById('result').style.color = '#a0a0a0';
 
@@ -90,7 +93,7 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ username, password, group_url, time_between })
+                    body: JSON.stringify({ username, password, group_url, profiles_to_scrape, hours_to_scrape })
                 });
 
                 if (!response.ok) {

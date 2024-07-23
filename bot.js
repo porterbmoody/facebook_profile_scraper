@@ -29,7 +29,8 @@ class Bot {
             username: response.username, 
             password: response.password, 
             group_url: response.group_url, 
-            time_between: response.time_between 
+            profiles_to_scrape: response.profiles_to_scrape, 
+            hours_to_scrape: response.hours_to_scrape,
         };
         console.log(this.response_data);
     }
@@ -96,53 +97,83 @@ class Bot {
     }
 
     async scrapeProfileData() {
-        const groupProfileURLs = await this.scrapeGroupProfileURLs();
-        console.log("Unique profile URLs to scrape:", groupProfileURLs.length);
-        this.scrapedData = [];
+        try {
+            const groupProfileURLs = await this.scrapeGroupProfileURLs();
+            console.log("Unique profile URLs to scrape:", groupProfileURLs.length);
+            this.scrapedData = [];
     
-        for (const groupProfileURL of groupProfileURLs) {
-            try {
-                console.log(`Waiting for ${this.response_data['time_between']} seconds before next profile...`);
-                await this.sleep(this.response_data['time_between'] * 1000);
-    
-                await this.page.goto(groupProfileURL, { waitUntil: 'networkidle2' });
-                await this.page.waitForSelector(SELECTORS.PROFILE_URL, { timeout: 10000 });
-    
-                const profile_url = await this.page.$eval(SELECTORS.PROFILE_URL, element => element.href);
-                await this.page.goto(profile_url, { waitUntil: 'networkidle2' });
-                await this.page.waitForSelector(SELECTORS.PROFILE_NAME, { timeout: 5000 });
+            // Calculate the total run time in milliseconds and the interval between scrapes in milliseconds
+            const totalRunTimeInMilliseconds = this.response_data['hours_to_scrape'] * 60 * 60 * 1000;
+            const timeBetweenScrapesInMilliseconds = totalRunTimeInMilliseconds / this.response_data['pages_to_scrape'];
 
-                const profile_name = await this.page.$eval(SELECTORS.PROFILE_NAME, element => element.textContent.trim());
-                console.log(`Scraping...${profile_name}`);
-                await this.page.waitForSelector(SELECTORS.MARITAL_STATUS, { timeout: 5000 });
+            console.log(`Scraping ${this.response_data['profiles_to_scrape']} pages over ${this.response_data['hours_to_scrape']} hours`);
+            console.log(`Time between scrapes is set to ${timeBetweenScrapesInMilliseconds / 1000} seconds`);
     
-                const marital_status = await this.page.evaluate((selector) => {
-                    try {
-                        const elements = document.querySelectorAll(selector);
-                        for (let element of elements) {
-                            const text = element.textContent.trim().toLowerCase();
-                            if (text.includes('married')) {
-                                return 'Married';
-                            } else if (text.includes('single')) {
-                                return 'Single';
+            let pagesScraped = 0;
+            const startTime = Date.now();
+
+            for (const groupProfileURL of groupProfileURLs) {
+                const elapsedTime = Date.now() - startTime;
+                if (elapsedTime > totalRunTimeInMilliseconds) {
+                    console.log('Total bot runtime exceeded. Ending process.');
+                    break;
+                }
+
+                try {
+                    console.log(`Waiting for ${timeBetweenScrapesInMilliseconds / 1000} seconds before next profile...`);
+                    await this.sleep(timeBetweenScrapesInMilliseconds);
+
+                    await this.page.goto(groupProfileURL, { waitUntil: 'networkidle2' });
+                    await this.page.waitForSelector(SELECTORS.PROFILE_URL, { timeout: 10000 });
+
+                    const profile_url = await this.page.$eval(SELECTORS.PROFILE_URL, element => element.href);
+                    await this.page.goto(profile_url, { waitUntil: 'networkidle2' });
+                    await this.page.waitForSelector(SELECTORS.PROFILE_NAME, { timeout: 5000 });
+
+                    const profile_name = await this.page.$eval(SELECTORS.PROFILE_NAME, element => element.textContent.trim());
+                    console.log(`Scraping...${profile_name}`);
+
+                    const marital_status = await this.page.evaluate((selector) => {
+                        try {
+                            const elements = document.querySelectorAll(selector);
+                            for (let element of elements) {
+                                const text = element.textContent.trim().toLowerCase();
+                                if (text.includes('married')) {
+                                    return 'Married';
+                                } else if (text.includes('single')) {
+                                    return 'Single';
+                                }
                             }
+                            return 'Not specified';
+                        } catch (error) {
+                            console.error('Error evaluating marital status:', error);
+                            return 'Error retrieving status';
                         }
-                        return 'Not specified';
-                    } catch (error) {
-                        console.error('Error evaluating marital status:', error);
-                        return 'Error retrieving status';
-                    }
-                }, SELECTORS.MARITAL_STATUS);
-
-                const new_row = { profile_name, marital_status, profile_url };
-                this.scrapedData.push(new_row);
-                await this.updateCSV();
-            } catch (error) {
-                console.error(`Error scraping profile: ${groupProfileURL}`, error);
+                    }, SELECTORS.MARITAL_STATUS);
+    
+                    const new_row = { profile_name, marital_status, profile_url };
+                    this.scrapedData.push(new_row);
+                    await this.updateCSV();
+    
+                    pagesScraped++;
+                } catch (error) {
+                    console.error(`Error scraping profile: ${groupProfileURL}`, error);
+                }
             }
+    
+            if (pagesScraped < this.response_data['pages_to_scrape']) {
+                console.log('Unable to scrape the specified number of pages within the given URLs.');
+            }
+        } catch (error) {
+            console.error("Error scraping group profile URLs:", error);
         }
     }
-
+    
+    // Helper function to sleep for a specified amount of milliseconds
+    sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+    
     async openBrowser() {
         console.log(`Starting Puppeteer...`);
         this.browser = await puppeteer.launch({
