@@ -78,8 +78,10 @@ class Bot {
         console.log(`Opening group URL ${this.response_data['group_url']}`);
         await this.page.goto(this.response_data['group_url'], { waitUntil: 'networkidle2' });
         await this.page.waitForSelector(SELECTORS.GROUP_MEMBERS, { timeout: 10000 });
-        // await this.autoScroll();
-        // await this.sleep(2000);
+        await this.autoScroll();
+        await this.sleep(2000);
+        await this.autoScroll();
+        await this.sleep(2000);
 
         const groupProfileURLs = await this.page.evaluate((selector) => {
             const elements = document.querySelectorAll(selector);
@@ -169,7 +171,6 @@ class Bot {
         }
     }
     
-    // Helper function to sleep for a specified amount of milliseconds
     sleep(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
@@ -178,7 +179,6 @@ class Bot {
         console.log(`Starting Puppeteer...`);
         this.browser = await puppeteer.launch({
             headless: false,
-            // executablePath: 'chromedriver/win64-126.0.6478.127/chromedriver-win64/chromedriver.exe',
             executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe',
             args: [
                 '--no-sandbox',
@@ -205,8 +205,6 @@ class Bot {
         try {
             await this.openBrowser();
             await this.login();
-            console.log('wating 20 seconds');
-            await this.sleep(20000);
             await this.scrapeProfileData();
         } catch (error) {
             console.error('An error occurred:', error);
@@ -218,6 +216,14 @@ class Bot {
     }
 }
 
+function closeServer() {
+    console.log('Closing server...');
+    server.close(() => {
+        console.log('Server closed');
+        process.exit(0);
+    });
+}
+
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
@@ -227,13 +233,23 @@ app.post('/run-bot', async (req, res) => {
         const bot = new Bot(req.body);
         await bot.runBot();
         res.send('Bot execution completed successfully!');
+        closeServer();
     } catch (error) {
         console.error('Error running bot:', error);
         res.status(500).send('Error running bot');
+        closeServer();
     }
 });
 
-app.listen(port, () => {
+function closeServer() {
+    console.log('Closing server...');
+    server.close(() => {
+        console.log('Server closed.');
+        process.exit(0); // Exit the process
+    });
+}
+
+const server = app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
     opn(`http://localhost:${port}`);
 });
