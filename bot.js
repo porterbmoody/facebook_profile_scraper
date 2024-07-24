@@ -205,7 +205,8 @@ class Bot {
         try {
             await this.openBrowser();
             await this.login();
-            await this.sleep(10000);
+            console.log('wating 20 seconds');
+            await this.sleep(20000);
             await this.scrapeProfileData();
         } catch (error) {
             console.error('An error occurred:', error);
