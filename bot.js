@@ -178,6 +178,7 @@ class Bot {
         console.log(`Starting Puppeteer...`);
         this.browser = await puppeteer.launch({
             headless: false,
+            executablePath: 'chromedriver/win64-126.0.6478.127/chromedriver-win64/chromedriver.exe',
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
