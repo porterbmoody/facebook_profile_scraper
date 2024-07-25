@@ -1,9 +1,17 @@
 const express = require('express');
 const fs = require('fs').promises;
+const fsSync = require('fs');
 const path = require('path');
 const opn = require('opn');
 const puppeteer = require('puppeteer');
 const { parse } = require('json2csv');
+var csv = require('jquery-csv');
+const csv2 = require('csv-parser');
+// const util = require('util'),
+    // request = util.promisify(require('request')),
+    // fs = require('fs'),
+    // fsp = fs.promises;
+// const pandas = require('pandas-js');
 
 const app = express();
 const port = 3000;
@@ -11,29 +19,62 @@ const port = 3000;
 app.use(express.json());
 app.use(express.static(__dirname));
 
-const SELECTORS = {
-    EMAIL_INPUT: "[aria-label='Email or phone number']",
-    PASSWORD_INPUT: "[aria-label='Password']",
-    LOGIN_BUTTON: "[name='login']",
-    GROUP_MEMBERS: "[class='x1i10hfl xjbqb8w x1ejq31n xd10rxx x1sy0etr x17r0tee x972fbf xcfux6l x1qhh985 xm0m39n x9f619 x1ypdohk xt0psk2 xe8uvvx xdj266r x11i5rnm xat24cr x1mh8g0r xexx8yu x4uap5 x18d9i69 xkhd6sd x16tdsg8 x1hl2dhg xggy1nq x1a2a7pz x1sur9pj xkrqix3 xzsf02u x1s688f']",
-    PROFILE_URL: "[aria-label='View profile']",
-    PROFILE_NAME: "[class='x193iq5w xeuugli x13faqbe x1vvkbs x1xmvt09 x1lliihq x1s928wv xhkezso x1gmr53x x1cpjm7i x1fgarty x1943h6x x14qwyeo xw06pyt x579bpy xjkpybl x1xlr1w8 xzsf02u x2b8uid']",
-    MARITAL_STATUS: "[class='x193iq5w xeuugli x13faqbe x1vvkbs x1xmvt09 x1lliihq x1s928wv xhkezso x1gmr53x x1cpjm7i x1fgarty x1943h6x xudqn12 x3x7a5m x1f6kntn xvq8zen xo1l8bm xzsf02u x1yc453h']"
+const selectors = {
+    username: "[aria-label='Email or phone number']",
+    password: "[aria-label='Password']",
+    login_button: "[name='login']",
+    group_members: "[class='x1i10hfl xjbqb8w x1ejq31n xd10rxx x1sy0etr x17r0tee x972fbf xcfux6l x1qhh985 xm0m39n x9f619 x1ypdohk xt0psk2 xe8uvvx xdj266r x11i5rnm xat24cr x1mh8g0r xexx8yu x4uap5 x18d9i69 xkhd6sd x16tdsg8 x1hl2dhg xggy1nq x1a2a7pz x1sur9pj xkrqix3 xzsf02u x1s688f']",
+    profile_url: "[aria-label='View profile']",
+    profile_name: "[class='x193iq5w xeuugli x13faqbe x1vvkbs x1xmvt09 x1lliihq x1s928wv xhkezso x1gmr53x x1cpjm7i x1fgarty x1943h6x x14qwyeo xw06pyt x579bpy xjkpybl x1xlr1w8 xzsf02u x2b8uid']",
+    marital_status: "[class='x193iq5w xeuugli x13faqbe x1vvkbs x1xmvt09 x1lliihq x1s928wv xhkezso x1gmr53x x1cpjm7i x1fgarty x1943h6x xudqn12 x3x7a5m x1f6kntn xvq8zen xo1l8bm xzsf02u x1yc453h']"
 };
 
 class Bot {
     constructor(response) {
         this.browser = null;
         this.page = null;
-        this.response_data = { 
-            username: response.username, 
-            password: response.password, 
-            group_url: response.group_url, 
-            profiles_to_scrape: response.profiles_to_scrape, 
-            hours_to_scrape: response.hours_to_scrape,
-        };
-        console.log(this.response_data);
+        this.response = response;
+        this.profileDataPath = path.join(__dirname, 'profile_data.csv');
+        this.jsonFilePath = path.join(__dirname, 'group_profiles.json'); // Make sure this is defined
     }
+
+        // this.readCSVAsJSON(this.profileDataPath)
+        //   .then(jsonData => {
+            // this.existingData = jsonData;
+            // console.log('CSV data loaded successfully');
+        //   })
+        //   .catch(err => console.error('Error loading CSV:', err));
+        // console.log(this.existingData);
+        // if (fs.existsSync(this.profileDataPath)) {
+            // const data = fs.readFileSync(this.profileDataPath, 'utf8');
+            // this.existing_group_profile_urls = new Set(this.profileData.get('group_profile_url').to_array());
+        // } else {
+            // this.profileData = new pandas.DataFrame({ 'group_profile_url': [] });
+            // this.existing_group_profile_urls = new Set();
+        // }
+
+    // async updateJsonFile() {
+        // try {
+            // let jsonData = [];
+            // try {
+                // const data = await fs.readFile(this.jsonFilePath, 'utf8');
+                // jsonData = JSON.parse(data);
+            // } catch (error) {
+                // if (error.code !== 'ENOENT') throw error;
+                // File doesn't exist, we'll create a new one
+            // }
+
+            // this.group_profile_urls.forEach(url => {
+                // if (!jsonData.some(item => item.group_profile_url === url)) {
+                    // jsonData.push({ group_profile_url: url });
+                // }
+            // });
+
+            // await fs.writeFile(this.jsonFilePath, JSON.stringify(jsonData, null, 2));
+        // } catch (error) {
+            // console.error('Error updating JSON file:', error);
+        // }
+    // }
 
     sleep(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
@@ -65,76 +106,142 @@ class Bot {
     async login() {
         try {
             await this.page.goto("https://www.facebook.com/", { waitUntil: 'networkidle2' });
-            await this.page.type(SELECTORS.EMAIL_INPUT, this.response_data['username'], { delay: 30 });
-            await this.page.type(SELECTORS.PASSWORD_INPUT, this.response_data['password'], { delay: 30 });
-            await this.page.click(SELECTORS.LOGIN_BUTTON);
+            await this.page.type(selectors.username, this.response['username'], { delay: 30 });
+            await this.page.type(selectors.password, this.response['password'], { delay: 30 });
+            await this.page.click(selectors.login_button);
             await this.page.waitForNavigation({ waitUntil: 'networkidle2' });
         } catch (error) {
             console.error('Error logging in:', error);
         }
     }
 
-    async scrapeGroupProfileURLs() {
-        console.log(`Opening group URL ${this.response_data['group_url']}`);
-        await this.page.goto(this.response_data['group_url'], { waitUntil: 'networkidle2' });
-        await this.page.waitForSelector(SELECTORS.GROUP_MEMBERS, { timeout: 10000 });
-        await this.autoScroll();
-        await this.sleep(2000);
-        await this.autoScroll();
-        await this.sleep(2000);
+    // async readCSV() {
+        // const results = [];
+        // fs.createReadStream('profile_data.csv')
+            // .pipe(csv2())
+            // .on('data', (data) => results.push(data))
+            // .on('end', () => {
+                // console.log('CSV file successfully read:', results);
+            // });
+    // };
 
-        const groupProfileURLs = await this.page.evaluate((selector) => {
-            const elements = document.querySelectorAll(selector);
-            const urls = new Set();
-            elements.forEach(element => {
-                const href = element.href;
-                if (href && href.includes('groups')) {
-                    urls.add(href);
-                }
-            });
-            return Array.from(urls);
-        }, SELECTORS.GROUP_MEMBERS);
-    
-        return groupProfileURLs;
+    async csvJSON(csv) {
+        const lines = csv.split('\n');
+        const headers = lines[0].split(',');
+        const result = lines.slice(1).map(line => {
+            const currentline = line.split(',');
+            return headers.reduce((obj, header, index) => {
+                obj[header] = currentline[index];
+                return obj;
+            }, {});
+        });
+        return result;
     }
 
+    async read_existing_data() {
+        console.log('reading in existing data...');
+        const headers = ['profile_name', 'marital_status', 'group_profile_url', 'profile_url'];
+        try {
+            if (!fsSync.existsSync(this.profileDataPath)) {
+                console.log(`File ${this.profileDataPath} does not exist. Creating it with headers row.`);
+                await fs.writeFile(this.profileDataPath, headers.join(',') + '\n');
+                this.existing_profile_data = headers.reduce((acc, header) => {
+                    acc[header] = [];
+                    return acc;
+                }, {});
+                return;
+            }
+    
+            const csv = await fs.readFile(this.profileDataPath, 'utf8');
+            const lines = csv.split('\n');
+            const fileHeaders = lines[0].split(',').map(header => header.replace(/"/g, '').trim());
+    
+            const result = fileHeaders.reduce((acc, header) => {
+                acc[header] = [];
+                return acc;
+            }, {});
+    
+            lines.slice(1).forEach(line => {
+                const currentline = line.split(',').map(cell => cell.replace(/"/g, '').trim());
+                fileHeaders.forEach((header, index) => {
+                    if (currentline[index] !== undefined) {
+                        result[header].push(currentline[index]);
+                    }
+                });
+            });
+    
+            this.existing_profile_data = result;
+            console.log(this.existing_profile_data);
+        } catch (error) {
+            console.error('Error reading CSV:', error);
+            throw error;
+        }
+    }
+    
+
+    async scrape_group_profile_urls() {
+        console.log('Finding URLs to scrape...');
+        await this.page.goto(this.response['group_url'], { waitUntil: 'networkidle2' });
+        await this.autoScroll();
+        await this.sleep(5000);
+        await this.autoScroll();
+        await this.sleep(5000);
+
+        const elements = await this.page.$$(selectors.group_members);
+        const urls = new Set();
+    
+        // Loop through each element and check if it has already been scraped
+        for (let element of elements) {
+            // Get the href attribute from the element
+            const href = await this.page.evaluate(el => el.href, element);
+            // console.log('Element href:', href);
+    
+            // Check if the href is valid and has not been scraped
+            if (href && href.includes('groups') && !this.existing_profile_data['group_profile_url'].includes(href)) {
+                urls.add(href);
+            }
+        }
+    
+        // Convert the Set to an Array
+        this.group_profile_urls = Array.from(urls);
+    
+        // console.log('Profiles to scrape that have not been scraped:');
+        // console.log(this.group_profile_urls);
+    }
+    
     async scrapeProfileData() {
         try {
-            const groupProfileURLs = await this.scrapeGroupProfileURLs();
-            console.log("Unique profile URLs to scrape:", groupProfileURLs.length);
-            this.scrapedData = [];
+            console.log("Unique profile URLs to scrape:", this.group_profile_urls.length);
     
             // Calculate the total run time in milliseconds and the interval between scrapes in milliseconds
-            const totalRunTimeInMilliseconds = this.response_data['hours_to_scrape'] * 60 * 60 * 1000;
-            const timeBetweenScrapesInMilliseconds = totalRunTimeInMilliseconds / this.response_data['pages_to_scrape'];
-
-            console.log(`Scraping ${this.response_data['profiles_to_scrape']} pages over ${this.response_data['hours_to_scrape']} hours`);
+            const totalRunTimeInMilliseconds = this.response['hours_to_scrape'] * 60 * 60 * 1000;
+            const timeBetweenScrapesInMilliseconds = totalRunTimeInMilliseconds / this.response['profiles_to_scrape'];
+    
+            console.log(`Scraping ${this.response['profiles_to_scrape']} pages over ${this.response['hours_to_scrape']} hours`);
             console.log(`Time between scrapes is set to ${timeBetweenScrapesInMilliseconds / 1000} seconds`);
     
             let pagesScraped = 0;
             const startTime = Date.now();
-
-            for (const groupProfileURL of groupProfileURLs) {
+    
+            for (const group_profile_url of this.group_profile_urls) {
                 const elapsedTime = Date.now() - startTime;
                 if (elapsedTime > totalRunTimeInMilliseconds) {
                     console.log('Total bot runtime exceeded. Ending process.');
                     break;
                 }
-
+    
                 try {
                     console.log(`Waiting for ${timeBetweenScrapesInMilliseconds / 1000} seconds before next profile...`);
                     await this.sleep(timeBetweenScrapesInMilliseconds);
-
-                    await this.page.goto(groupProfileURL, { waitUntil: 'networkidle2' });
-                    await this.page.waitForSelector(SELECTORS.PROFILE_URL, { timeout: 10000 });
-
-                    const profile_url = await this.page.$eval(SELECTORS.PROFILE_URL, element => element.href);
+    
+                    await this.page.goto(group_profile_url, { waitUntil: 'networkidle2' });
+                    await this.page.waitForSelector(selectors.profile_url, { timeout: 10000 });
+    
+                    const profile_url = await this.page.$eval(selectors.profile_url, element => element.href);
                     await this.page.goto(profile_url, { waitUntil: 'networkidle2' });
-                    await this.page.waitForSelector(SELECTORS.PROFILE_NAME, { timeout: 5000 });
-
-                    const profile_name = await this.page.$eval(SELECTORS.PROFILE_NAME, element => element.textContent.trim());
+                    await this.page.waitForSelector(selectors.profile_name, { timeout: 5000 });
+                    const profile_name = await this.page.$eval(selectors.profile_name, element => element.textContent.trim());
                     console.log(`Scraping...${profile_name}`);
-
                     const marital_status = await this.page.evaluate((selector) => {
                         try {
                             const elements = document.querySelectorAll(selector);
@@ -146,28 +253,53 @@ class Bot {
                                     return 'Single';
                                 }
                             }
-                            return 'Not specified';
+                            return 'not specified';
                         } catch (error) {
                             console.error('Error evaluating marital status:', error);
                             return 'Error retrieving status';
                         }
-                    }, SELECTORS.MARITAL_STATUS);
+                    }, selectors.marital_status);
     
-                    const new_row = { profile_name, marital_status, profile_url };
-                    this.scrapedData.push(new_row);
-                    await this.updateCSV();
+                    const new_row = { profile_name, marital_status, group_profile_url, profile_url };
+    
+                    // Append new row to existing profile data and save as CSV
+                    await this.updateCSV(new_row);
     
                     pagesScraped++;
                 } catch (error) {
-                    console.error(`Error scraping profile: ${groupProfileURL}`, error);
+                    console.error(`Error scraping profile: ${group_profile_url}`, error);
                 }
             }
     
-            if (pagesScraped < this.response_data['pages_to_scrape']) {
-                console.log('Unable to scrape the specified number of pages within the given URLs.');
-            }
+            // if (pagesScraped < this.response['profiles_to_scrape']) {
+                // console.log('Unable to scrape the specified number of pages within the given URLs.');
+            // }
         } catch (error) {
             console.error("Error scraping group profile URLs:", error);
+        }
+    }
+    
+
+    async updateCSV(newRow) {
+        try {
+            // Append new row to existing profile data
+            for (const key in newRow) {
+                if (newRow.hasOwnProperty(key) && this.existing_profile_data.hasOwnProperty(key)) {
+                    this.existing_profile_data[key].push(newRow[key]);
+                }
+            }
+    
+            // Convert existing profile data to CSV format
+            const headers = Object.keys(this.existing_profile_data);
+            const csv = headers.join(',') + '\n' + this.existing_profile_data[headers[0]].map((_, i) =>
+                headers.map(header => this.existing_profile_data[header][i]).join(',')
+            ).join('\n');
+    
+            // Save the updated CSV file
+            await fs.writeFile(this.profileDataPath, csv);
+            console.log('CSV file updated successfully.');
+        } catch (error) {
+            console.error('Error updating CSV file:', error);
         }
     }
     
@@ -191,13 +323,36 @@ class Bot {
         console.log(`Logging in...`);
     }
 
-    async updateCSV() {
+    async filterAndSaveCSV() {
         try {
-            const csv = parse(this.scrapedData);
-            await fs.writeFile('profile_data.csv', csv);
-            console.log('CSV file saved successfully.');
+            // Filter out rows where marital_status is 'not specified'
+            const filteredData = {};
+            const numRows = this.existing_profile_data['marital_status'].length;
+
+            // Initialize the filteredData object with empty arrays for each header
+            Object.keys(this.existing_profile_data).forEach(header => {
+                filteredData[header] = [];
+            });
+
+            for (let i = 0; i < numRows; i++) {
+                if (this.existing_profile_data['marital_status'][i] !== 'not specified') {
+                    Object.keys(this.existing_profile_data).forEach(header => {
+                        filteredData[header].push(this.existing_profile_data[header][i]);
+                    });
+                }
+            }
+
+            // Convert filtered data to CSV format
+            const headers = Object.keys(filteredData);
+            const csv = headers.join(',') + '\n' + filteredData[headers[0]].map((_, i) =>
+                headers.map(header => filteredData[header][i]).join(',')
+            ).join('\n');
+
+            // Save the filtered data to a new CSV file
+            await fs.writeFile('filtered_profile_data.csv', csv);
+            console.log('Filtered CSV file saved successfully.');
         } catch (error) {
-            console.error('Error saving CSV file:', error);
+            console.error('Error saving filtered CSV file:', error);
         }
     }
 
@@ -205,7 +360,10 @@ class Bot {
         try {
             await this.openBrowser();
             await this.login();
+            await this.read_existing_data();
+            await this.scrape_group_profile_urls()
             await this.scrapeProfileData();
+            await bot.filterAndSaveCSV();   
         } catch (error) {
             console.error('An error occurred:', error);
         } finally {
@@ -224,32 +382,36 @@ function closeServer() {
     });
 }
 
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
-});
+// app.get('/', (req, res) => {
+    // res.sendFile(path.join(__dirname, 'index.html'));
+// });
 
-app.post('/run-bot', async (req, res) => {
-    try {
-        const bot = new Bot(req.body);
-        await bot.runBot();
-        res.send('Bot execution completed successfully!');
-        closeServer();
-    } catch (error) {
-        console.error('Error running bot:', error);
-        res.status(500).send('Error running bot');
-        closeServer();
-    }
-});
+// app.post('/run-bot', async (req, res) => {
+    // try {
+        // console.log(req.body);
+        // const bot = new Bot(req.body);
+        // await bot.runBot();
+        // res.send('Bot execution completed successfully!');
+        // closeServer();
+    // } catch (error) {
+        // console.error('Error running bot:', error);
+        // res.status(500).send('Error running bot');
+        // closeServer();
+//     }
+// });
 
-function closeServer() {
-    console.log('Closing server...');
-    server.close(() => {
-        console.log('Server closed.');
-        process.exit(0); // Exit the process
-    });
-}
+// const server = app.listen(port, () => {
+//     console.log(`Server running at http://localhost:${port}`);
+//     opn(`http://localhost:${port}`);
+// });
 
-const server = app.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}`);
-    opn(`http://localhost:${port}`);
-});
+
+const bot = new Bot({
+    username: 'porterbmoody@gmail.com',
+    password: 'Yoho1mes',
+    group_url: 'https://www.facebook.com/groups/344194813025772/members/',
+    profiles_to_scrape: '5',
+    hours_to_scrape: '.01'
+  });
+bot.runBot();
+
