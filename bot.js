@@ -29,7 +29,7 @@ class Bot {
         this.page = null;
         this.response = response;
         this.profileDataPath = path.join(__dirname, 'profile_data.csv');
-        this.jsonFilePath = path.join(__dirname, 'group_profiles.json'); // Make sure this is defined
+        this.profileDataPath = 'profile_data.csv';
     }
 
         // this.readCSVAsJSON(this.profileDataPath)
@@ -46,29 +46,6 @@ class Bot {
             // this.profileData = new pandas.DataFrame({ 'group_profile_url': [] });
             // this.existing_group_profile_urls = new Set();
         // }
-
-    // async updateJsonFile() {
-        // try {
-            // let jsonData = [];
-            // try {
-                // const data = await fs.readFile(this.jsonFilePath, 'utf8');
-                // jsonData = JSON.parse(data);
-            // } catch (error) {
-                // if (error.code !== 'ENOENT') throw error;
-                // File doesn't exist, we'll create a new one
-            // }
-
-            // this.group_profile_urls.forEach(url => {
-                // if (!jsonData.some(item => item.group_profile_url === url)) {
-                    // jsonData.push({ group_profile_url: url });
-                // }
-            // });
-
-            // await fs.writeFile(this.jsonFilePath, JSON.stringify(jsonData, null, 2));
-        // } catch (error) {
-            // console.error('Error updating JSON file:', error);
-        // }
-    // }
 
     sleep(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
