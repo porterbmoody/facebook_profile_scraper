@@ -181,13 +181,13 @@ class Bot {
     
     async scrapeProfileData() {
         try {
-            console.log("Unique profile URLs to scrape:", this.group_profile_urls.length);
-    
-            // Calculate the total run time in milliseconds and the interval between scrapes in milliseconds
+            console.log("possible profiles to scrape:", this.group_profile_urls.length);
+            console.log("input number to scrape:", this.response['profiles_to_scrape']);
+            console.log("over:", this.response['hours_to_scrape']);
+            
             const totalRunTimeInMilliseconds = this.response['hours_to_scrape'] * 60 * 60 * 1000;
             const timeBetweenScrapesInMilliseconds = totalRunTimeInMilliseconds / this.response['profiles_to_scrape'];
-    
-            console.log(`Scraping ${this.response['profiles_to_scrape']} pages over ${this.response['hours_to_scrape']} hours`);
+
             console.log(`Time between scrapes is set to ${timeBetweenScrapesInMilliseconds / 1000} seconds`);
     
             let pagesScraped = 0;
@@ -195,10 +195,10 @@ class Bot {
     
             for (const group_profile_url of this.group_profile_urls) {
                 const elapsedTime = Date.now() - startTime;
-                if (elapsedTime > totalRunTimeInMilliseconds) {
-                    console.log('Total bot runtime exceeded. Ending process.');
-                    break;
-                }
+                // if (elapsedTime > totalRunTimeInMilliseconds) {
+                    // console.log('Total bot runtime exceeded. Ending process.');
+                    // break;
+                // }
     
                 try {
                     console.log(`Waiting for ${timeBetweenScrapesInMilliseconds / 1000} seconds before next profile...`);
@@ -236,14 +236,15 @@ class Bot {
                     await this.updateCSV(new_row);
     
                     pagesScraped++;
+                    if (pagesScraped == this.response['profiles_to_scrape']) {
+                        console.log('Unable to scrape the specified number of pages within the given URLs.');
+                        break;
+                    }
                 } catch (error) {
                     console.error(`Error scraping profile: ${group_profile_url}`, error);
                 }
             }
     
-            // if (pagesScraped < this.response['profiles_to_scrape']) {
-                // console.log('Unable to scrape the specified number of pages within the given URLs.');
-            // }
         } catch (error) {
             console.error("Error scraping group profile URLs:", error);
         }
