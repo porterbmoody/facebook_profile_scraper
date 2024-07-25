@@ -133,7 +133,7 @@ class Bot {
     }
 
     async read_existing_data() {
-        console.log('reading in existing data...');
+        console.log(`reading in existing data from path ${this.profileDataPath}`);
         const headers = ['profile_name', 'marital_status', 'group_profile_url', 'profile_url'];
         try {
             if (!fsSync.existsSync(this.profileDataPath)) {
