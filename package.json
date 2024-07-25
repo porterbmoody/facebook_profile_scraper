@@ -1,0 +1,17 @@
+{
+  "name": "facebook_profile_scraper",
+  "version": "1.0.0",
+  "main": "bot.js",
+  "bin": {
+    "bot": "./bot.js"
+  },
+  "scripts": {
+    "start": "node bot.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "opn": "^6.0.0",
+    "pkg": "^5.8.1",
+    "puppeteer": "^22.14.0"
+  }
+}

@@ -4,14 +4,8 @@ const fsSync = require('fs');
 const path = require('path');
 const opn = require('opn');
 const puppeteer = require('puppeteer');
-const { parse } = require('json2csv');
-var csv = require('jquery-csv');
-const csv2 = require('csv-parser');
-// const util = require('util'),
-    // request = util.promisify(require('request')),
-    // fs = require('fs'),
-    // fsp = fs.promises;
-// const pandas = require('pandas-js');
+// const { parse } = require('json2csv');
+// var csv = require('jquery-csv');
 
 const app = express();
 const port = 3000;
@@ -178,7 +172,6 @@ class Bot {
         }
     }
     
-
     async scrape_group_profile_urls() {
         console.log('Finding URLs to scrape...');
         await this.page.goto(this.response['group_url'], { waitUntil: 'networkidle2' });
@@ -363,7 +356,7 @@ class Bot {
             await this.read_existing_data();
             await this.scrape_group_profile_urls()
             await this.scrapeProfileData();
-            await bot.filterAndSaveCSV();   
+            await this.filterAndSaveCSV();   
         } catch (error) {
             console.error('An error occurred:', error);
         } finally {
@@ -382,36 +375,36 @@ function closeServer() {
     });
 }
 
-// app.get('/', (req, res) => {
-    // res.sendFile(path.join(__dirname, 'index.html'));
-// });
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
 
-// app.post('/run-bot', async (req, res) => {
-    // try {
-        // console.log(req.body);
-        // const bot = new Bot(req.body);
-        // await bot.runBot();
-        // res.send('Bot execution completed successfully!');
-        // closeServer();
-    // } catch (error) {
-        // console.error('Error running bot:', error);
-        // res.status(500).send('Error running bot');
-        // closeServer();
-//     }
-// });
+app.post('/run-bot', async (req, res) => {
+    try {
+        console.log(req.body);
+        const bot = new Bot(req.body);
+        await bot.runBot();
+        res.send('Bot execution completed successfully!');
+        closeServer();
+    } catch (error) {
+        console.error('Error running bot:', error);
+        res.status(500).send('Error running bot');
+        closeServer();
+    }
+});
 
-// const server = app.listen(port, () => {
-//     console.log(`Server running at http://localhost:${port}`);
-//     opn(`http://localhost:${port}`);
-// });
+const server = app.listen(port, () => {
+    console.log(`Server running at http://localhost:${port}`);
+    opn(`http://localhost:${port}`);
+});
 
 
-const bot = new Bot({
-    username: 'porterbmoody@gmail.com',
-    password: 'Yoho1mes',
-    group_url: 'https://www.facebook.com/groups/344194813025772/members/',
-    profiles_to_scrape: '5',
-    hours_to_scrape: '.01'
-  });
-bot.runBot();
+// const bot = new Bot({
+//     username: 'porterbmoody@gmail.com',
+//     password: 'Yoho1mes',
+//     group_url: 'https://www.facebook.com/groups/344194813025772/members/',
+//     profiles_to_scrape: '5',
+//     hours_to_scrape: '.01'
+//   });
+// bot.runBot();
 
