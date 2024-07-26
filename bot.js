@@ -56,23 +56,38 @@ class Bot {
     }
 
     async autoScroll() {
-        await this.page.evaluate(async () => {
-            await new Promise((resolve) => {
-                var totalHeight = 0;
-                var distance = 100;
-                var timer = setInterval(() => {
-                    var scrollHeight = document.body.scrollHeight;
+        const selector = selectors['group_members'];
+        const targetCount = this.response['profiles_to_scrape'];
+        
+        await this.page.evaluate(async (selector, targetCount) => {
+            const distance = 100;
+            const delay = 100;
+    
+            const scrollDown = async () => {
+                const elements = document.querySelectorAll(selector);
+                console.log(`Currently found ${elements.length} elements`);
+    
+                if (elements.length >= targetCount) {
+                    return; // Resolve if the target count is reached
+                }
+    
+                const totalHeight = window.scrollY + window.innerHeight;
+                const scrollHeight = document.body.scrollHeight;
+    
+                if (totalHeight < scrollHeight) {
                     window.scrollBy(0, distance);
-                    totalHeight += distance;
-
-                    if (totalHeight >= scrollHeight - window.innerHeight) {
-                        clearInterval(timer);
-                        resolve();
-                    }
-                }, 100);
-            });
-        });
+                    setTimeout(scrollDown, delay);
+                } else {
+                    return;
+                }
+            };
+    
+            scrollDown();
+        }, selector, targetCount);
     }
+    
+    
+    
 
     async login() {
         try {
@@ -152,8 +167,6 @@ class Bot {
     async scrape_group_profile_urls() {
         console.log('Finding URLs to scrape...');
         await this.page.goto(this.response['group_url'], { waitUntil: 'networkidle2' });
-        await this.autoScroll();
-        await this.sleep(5000);
         await this.autoScroll();
         await this.sleep(5000);
 
