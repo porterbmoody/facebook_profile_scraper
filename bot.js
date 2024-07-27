@@ -4,8 +4,6 @@ const fsSync = require('fs');
 const path = require('path');
 const opn = require('opn');
 const puppeteer = require('puppeteer');
-// const { parse } = require('json2csv');
-// var csv = require('jquery-csv');
 
 const app = express();
 const port = 3000;
@@ -32,21 +30,6 @@ class Bot {
         this.profileDataPath = 'profile_data.csv';
     }
 
-        // this.readCSVAsJSON(this.profileDataPath)
-        //   .then(jsonData => {
-            // this.existingData = jsonData;
-            // console.log('CSV data loaded successfully');
-        //   })
-        //   .catch(err => console.error('Error loading CSV:', err));
-        // console.log(this.existingData);
-        // if (fs.existsSync(this.profileDataPath)) {
-            // const data = fs.readFileSync(this.profileDataPath, 'utf8');
-            // this.existing_group_profile_urls = new Set(this.profileData.get('group_profile_url').to_array());
-        // } else {
-            // this.profileData = new pandas.DataFrame({ 'group_profile_url': [] });
-            // this.existing_group_profile_urls = new Set();
-        // }
-
     sleep(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
@@ -55,39 +38,35 @@ class Bot {
         return Math.floor(Math.random() * (max - min + 1) + min);
     }
 
-    async autoScroll() {
-        const selector = selectors['group_members'];
-        const targetCount = this.response['profiles_to_scrape'];
-        
-        await this.page.evaluate(async (selector, targetCount) => {
-            const distance = 100;
-            const delay = 100;
+    // async autoScroll(selector, targetCount) {
+        // const distance = 100;
+        // const delay = 100;
     
-            const scrollDown = async () => {
-                const elements = document.querySelectorAll(selector);
-                console.log(`Currently found ${elements.length} elements`);
+        // async function scrollStep() {
+            // const elements = document.querySelectorAll(selector);
     
-                if (elements.length >= targetCount) {
-                    return; // Resolve if the target count is reached
-                }
+            // if (elements.length >= targetCount) {
+                // console.log(`Found ${elements.length} elements. Stopping scroll.`);
+                // return;
+            // }
     
-                const totalHeight = window.scrollY + window.innerHeight;
-                const scrollHeight = document.body.scrollHeight;
+            // const totalHeight = window.scrollY + window.innerHeight;
+            // const scrollHeight = document.body.scrollHeight;
     
-                if (totalHeight < scrollHeight) {
-                    window.scrollBy(0, distance);
-                    setTimeout(scrollDown, delay);
-                } else {
-                    return;
-                }
-            };
+            // if (totalHeight < scrollHeight) {
+                // window.scrollBy(0, distance);
+                // setTimeout(scrollStep, delay);
+            // } else {
+                // console.log('Reached the bottom of the page.');
+            // }
+        // }
     
-            scrollDown();
-        }, selector, targetCount);
-    }
-    
-    
-    
+        // await scrollStep();
+    // }
+
+    // async autoScroll() {
+
+    // }
 
     async login() {
         try {
@@ -100,16 +79,6 @@ class Bot {
             console.error('Error logging in:', error);
         }
     }
-
-    // async readCSV() {
-        // const results = [];
-        // fs.createReadStream('profile_data.csv')
-            // .pipe(csv2())
-            // .on('data', (data) => results.push(data))
-            // .on('end', () => {
-                // console.log('CSV file successfully read:', results);
-            // });
-    // };
 
     async csvJSON(csv) {
         const lines = csv.split('\n');
@@ -141,7 +110,6 @@ class Bot {
             const csv = await fs.readFile(this.profileDataPath, 'utf8');
             const lines = csv.split('\n');
             const fileHeaders = lines[0].split(',').map(header => header.replace(/"/g, '').trim());
-    
             const result = fileHeaders.reduce((acc, header) => {
                 acc[header] = [];
                 return acc;
@@ -163,40 +131,51 @@ class Bot {
             throw error;
         }
     }
+
+    async open_members_tab() {
+        try {
+            await this.page.goto(this.response['group_url'], { waitUntil: 'networkidle2' });
+            console.log('scrolling');
+            let continue_scrolling = true;
+
+            while (continue_scrolling) {
+                const elements = await this.page.$$(selectors['group_members']);
+                await this.page.evaluate(() => window.scrollBy(0, 1000));
+                // window.scrollTo(0, document.body.scrollHeight);
+                console.log('waiting');
+                console.log(`total members found: ${elements.length}`)
+                await this.sleep(1000);
+                if (elements.length >= this.response['profiles_to_scrape']) {
+                    console.log(`Found ${elements.length} elements. Stopping scroll.`);
+                    continue_scrolling = false;
+                }
+            }
+            console.log('done scrolling');
+        } catch (error) {
+            console.error('Error during scrolling:', error);
+        }
+    }
     
     async scrape_group_profile_urls() {
         console.log('Finding URLs to scrape...');
-        await this.page.goto(this.response['group_url'], { waitUntil: 'networkidle2' });
-        await this.autoScroll();
-        await this.sleep(5000);
 
+        await this.sleep(3000);
         const elements = await this.page.$$(selectors.group_members);
         const urls = new Set();
-    
-        // Loop through each element and check if it has already been scraped
         for (let element of elements) {
-            // Get the href attribute from the element
             const href = await this.page.evaluate(el => el.href, element);
-            // console.log('Element href:', href);
-    
-            // Check if the href is valid and has not been scraped
             if (href && href.includes('groups') && !this.existing_profile_data['group_profile_url'].includes(href)) {
                 urls.add(href);
             }
         }
-    
-        // Convert the Set to an Array
         this.group_profile_urls = Array.from(urls);
-    
-        // console.log('Profiles to scrape that have not been scraped:');
-        // console.log(this.group_profile_urls);
     }
-    
+
     async scrapeProfileData() {
         try {
             console.log("possible profiles to scrape:", this.group_profile_urls.length);
             console.log("input number to scrape:", this.response['profiles_to_scrape']);
-            console.log("over:", this.response['hours_to_scrape']);
+            console.log(`over ${this.response['hours_to_scrape']} hours`);
             
             const totalRunTimeInMilliseconds = this.response['hours_to_scrape'] * 60 * 60 * 1000;
             const timeBetweenScrapesInMilliseconds = totalRunTimeInMilliseconds / this.response['profiles_to_scrape'];
@@ -345,6 +324,7 @@ class Bot {
             await this.openBrowser();
             await this.login();
             await this.read_existing_data();
+            await this.open_members_tab();
             await this.scrape_group_profile_urls()
             await this.scrapeProfileData();
             await this.filterAndSaveCSV();   
