@@ -64,9 +64,6 @@ class Bot {
         // await scrollStep();
     // }
 
-    // async autoScroll() {
-
-    // }
 
     async login() {
         try {
@@ -142,7 +139,7 @@ class Bot {
                 const elements = await this.page.$$(selectors['group_members']);
                 await this.page.evaluate(() => window.scrollBy(0, 1000));
                 // window.scrollTo(0, document.body.scrollHeight);
-                console.log('waiting');
+                // console.log('waiting');
                 console.log(`total members found: ${elements.length}`)
                 await this.sleep(1000);
                 if (elements.length >= this.response['profiles_to_scrape']) {
