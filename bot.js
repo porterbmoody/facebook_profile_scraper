@@ -225,7 +225,7 @@ class Bot {
                             console.error('Error evaluating marital status:', error);
                             return 'Error retrieving status';
                         }
-                    }, selectors.marital_status);
+                    }, selectors['marital_status']);
     
                     const new_row = { profile_name, marital_status, group_profile_url, profile_url };
     
