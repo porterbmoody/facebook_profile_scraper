@@ -129,19 +129,27 @@ class Bot {
         }
     }
 
-    async open_members_tab() {
+    async view_all_members() {
         try {
             await this.page.goto(this.response['group_url'], { waitUntil: 'networkidle2' });
             console.log('scrolling');
             let continue_scrolling = true;
-
             while (continue_scrolling) {
                 const elements = await this.page.$$(selectors['group_members']);
-                await this.page.evaluate(() => window.scrollBy(0, 1000));
-                // window.scrollTo(0, document.body.scrollHeight);
-                // console.log('waiting');
-                console.log(`total members found: ${elements.length}`)
-                await this.sleep(1000);
+                const isAtBottom = await this.page.evaluate(() => {
+                    const scrollHeight = document.documentElement.scrollHeight;
+                    const scrollTop = window.scrollY;
+                    const clientHeight = window.innerHeight;
+                    return scrollHeight - scrollTop <= clientHeight + 100; // 100px threshold
+                });
+                if (isAtBottom) {
+                    console.log('Reached the bottom of the page. Stopping scroll.');
+                    continue_scrolling = false;
+                } else {
+                    await this.page.evaluate(() => window.scrollBy(0, 1000));
+                    console.log(`total members found: ${elements.length}`);
+                    await this.sleep(1000);
+                }
                 if (elements.length >= this.response['profiles_to_scrape']) {
                     console.log(`Found ${elements.length} elements. Stopping scroll.`);
                     continue_scrolling = false;
@@ -321,7 +329,7 @@ class Bot {
             await this.openBrowser();
             await this.login();
             await this.read_existing_data();
-            await this.open_members_tab();
+            await this.view_all_members();
             await this.scrape_group_profile_urls()
             await this.scrapeProfileData();
             await this.filterAndSaveCSV();   
