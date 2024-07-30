@@ -6,12 +6,27 @@
     "bot": "./bot.js"
   },
   "scripts": {
-    "start": "node bot.js"
+    "start": "node bot.js",
+    "pkg": "pkg . --targets node18-win-x64 --output bot.exe"
   },
   "dependencies": {
     "express": "^4.19.2",
     "opn": "^6.0.0",
     "pkg": "^5.8.1",
     "puppeteer": "^22.14.0"
-  }
+  },
+  "pkg": {
+    "assets": [
+      "meta_data.json"
+    ],
+    "scripts": [
+      "bot.js"
+    ],
+    "targets": ["node18-win-x64"]
+  },
+  "files": [
+    "bot.js",
+    "meta_data.json",
+    "index.html"
+  ]
 }
