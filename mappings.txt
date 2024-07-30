@@ -1,8 +1,0 @@
-posts,about
-https://www.facebook.com/profile.php?id=32403408,https://www.facebook.com/profile.php?id=32403408&sk=about_family_and_relationships
-https://www.facebook.com/xmplyme,https://www.facebook.com/xmplyme/about_family_and_relationships
-https://www.facebook.com/amber.n.jinks/,https://www.facebook.com/amber.n.jinks/about_family_and_relationships
-https://www.facebook.com/avery.addison.5/,https://www.facebook.com/avery.addison.5/about_family_and_relationships
-https://www.facebook.com/ganavi.gans/,https://www.facebook.com/ganavi.gans/about_family_and_relationships
-https://www.facebook.com/gabriela.suarez.90663/about,https://www.facebook.com/gabriela.suarez.90663/about_family_and_relationships
-https://www.facebook.com/chanay.johnson.71/,https://www.facebook.com/chanay.johnson.71/about_family_and_relationships

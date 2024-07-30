@@ -42,19 +42,6 @@ class Bot {
         }
     }
 
-    async csvJSON(csv) {
-        const lines = csv.split('\n');
-        const headers = lines[0].split(',');
-        const result = lines.slice(1).map(line => {
-            const currentline = line.split(',');
-            return headers.reduce((obj, header, index) => {
-                obj[header] = currentline[index];
-                return obj;
-            }, {});
-        });
-        return result;
-    }
-
     async read_existing_data() {
         console.log(`reading in existing data from path ${this.profileDataPath}`);
         const headers = ['profile_name', 'relationship_status', 'group_profile_url', 'profile_url'];
@@ -155,90 +142,6 @@ class Bot {
         });
     }
 
-    // async scrape_profile() {
-        // https://www.facebook.com/madison.esch.5/
-        // await this.page.goto(this.profile_url, { waitUntil: 'networkidle2' });
-
-        // await this.page.waitForSelector(this.meta_data['tabs']);
-        // console.log(tab_elements);
-        // const tab_urls = [];
-        // const about_tab = tab_elements[1];
-        // await about_tab.click();
-        // await this.sleep(3000);
-        // const details = await about_tab.evaluate(el => {
-            // return {
-                // tagName: el.tagName,
-                // innerHTML: el.innerHTML,
-                // outerHTML: el.outerHTML,
-                // href: el.href,
-                // id: el.id,
-                // className: el.className,
-                // textContent: el.textContent,
-                // attributes: Array.from(el.attributes).map(attr => ({
-                    // name: attr.name,
-                    // value: attr.value
-                // }))
-            // };
-        // });
-        // await this.save_source_code();
-        // console.log('Element Details:', details);
-        // console.log('click');
-        // about_tab.click();
-        // console.log(about_tab);
-        // const about_tab_url = await about_tab.evaluate(el => el.href);
-        // const element_property = await about_tab.getProperty('innerHTML');
-        // console.log('about_tab_url');
-        // console.log(about_tab_url);
-        // await this.sleep(150000);
-        // this.page.click()
-        // const scriptContent = await page.evaluate(() => {
-            // const script = document.querySelector('script[type="application/json"][data-sjs]');
-            // return script ? script.textContent : null;
-        // });
-        // this.page.$eval(this.meta_data['tabs'], (element) => {
-            // return element.innerHTML
-        //   })
-        // for (const element of tab_elements) {
-            // const href = await element.evaluate(el => el.href);
-            // tab_urls.push(href);
-        // }
-
-        // const about_tab = tab_elements[1].evaluate(element => element.href);
-        // console.log(tab_urls);
-        // const tab_urls = await this.page.evaluate(elements => elements.map(el => el.href), tab_elements);
-        // const tab_urls = await this.page.$$(this.meta_data['tabs'], element => element.href);
-        // console.log(tab_urls);
-        // console.log('clicking on about tab');
-        // const about_tab_url = tab_urls[1];
-        // await this.page.goto(about_tab_url, { waitUntil: 'networkidle2' });
-        // for (let tab_url of tab_urls) {
-            // if (tab_url.includes('about')) {
-                // const about_profile_url = tab_url;
-            // }
-        // }
-        // await this.sleep(15000);
-        // console.log(about_tab_url);
-        // const aboutTabClicked = await this.page.evaluate((tabSelector) => {
-        // await this.sleep(1000);
-        // await this.page.waitForNavigation({ waitUntil: 'networkidle0' });
-        // console.log('Successfully navigated to About page');
-
-        // console.log('navigating to family and relationships tab...');
-        // const detail_tabs = this.page.querySelectorAll(this.meta_data['detail_tabs']);
-        // for (let detail_tab of detail_tabs) {
-            // if (detail_tab.textContent.includes('About')) {
-                // detail_tab.click();
-            // }
-        // }
-        // await this.sleep(3000);
-        // let currentUrl = this.page.url();
-        // const profile_url_relationship_tab = `${currentUrl}_family_and_relationships`;
-        // await this.page.goto(profile_url_relationship_tab, { waitUntil: 'networkidle2' });
-        // const profile_name = await this.page.$eval(this.meta_data['profile_name'], element => element.textContent.trim());
-        // const relationship_status = await this.page.$eval(this.meta_data['relationship_title_status'])
-        
-    // }
-
     async scrape_profiles() {
         try {
             console.log("possible profiles to scrape:", this.group_profile_urls.length);
@@ -256,8 +159,9 @@ class Bot {
                     await this.page.waitForSelector(this.meta_data['profile_url'], { timeout: 10000 });
                     const profile_url = await this.page.$eval(this.meta_data['profile_url'], element => element.href);
                     await this.page.goto(profile_url, { waitUntil: 'networkidle2' });
+                    const profile_name = await this.page.$eval(this.meta_data['profile_name'], element => element.textContent.trim());
+                    console.log(`Scraping...${profile_name}`);
                     // await this.scrape_profile();
-                    await this.sleep(6000);
                     const currentUrl = await this.page.url();
                     console.log(currentUrl);
                     let about_url = currentUrl;
@@ -271,8 +175,7 @@ class Bot {
                     await this.page.goto(about_url, { waitUntil: 'networkidle2' });
                     await this.sleep(3000);
                     await this.page.waitForSelector(this.meta_data['profile_name'], { timeout: 5000 });
-                    const profile_name = await this.page.$eval(this.meta_data['profile_name'], element => element.textContent.trim());
-                    console.log(`Scraping...${profile_name}`);
+                    await this.sleep(3000);
                     const relationship_fields = await this.page.$$(this.meta_data['relationship_title_status']);
                     const relationship_field = await relationship_fields[0].evaluate(el => el.textContent.trim());
                     // console.log('relationship_field:', relationship_field);
@@ -295,51 +198,7 @@ class Bot {
                     // console.log(relationship_details);
                     const relationship_status = relationship_details[relationship_details.length - 1].replace(/,/g, '');
                     console.log(relationship_status);
-                    // console.log('Additional relationship information:');
-                    // relationship_status.forEach((info, index) => {
-                        // console.log(`${index + 1}. ${info}`);
-                    // });
-                        // return {
-                            // status: relationship_status,
-                            // additionalInfo: additional_info
-                        // };
-                    // console.log(relationship_fields);
-                    // const relationship_status = await relationship_fields[0].evaluate(el => el.textContent.trim());
-                    // console.log('relationship_status');
-                    // console.log(relationship_status);
-                    // let relationshipStatus = 'Not specified';
-                    // if (relationship_fields.length > 0) {
-                        // Get text from the first element
-                    // }
-                    // if (currentUrl.endsWith('/')) {
-                        // currentUrl = currentUrl.slice(0, -1);
-                    // }
 
-                    // await this.page.waitForSelector(this.meta_data['relationship_status'], { timeout: 5000 });
-                    // console.log(relationship_status);
-                    // const relationship_status = await this.page.evaluate(() => {
-                    // await this.scrape_relationship_status()
-                    // new Promise(resolve => setTimeout(resolve, 5000));
-                    // const detail_elements = document.querySelectorAll(this.meta_data['detail_element']);
-                    // const detail_elements = await this.page.$$(this.meta_data['detail_element']);
-                    // console.log('detail_elements');
-                    // console.log(detail_elements);
-                    // console.log(detail_elements.length);
-                    // for (let detail_element of detail_elements) {
-                        // const heartIcon = detail_element.querySelector(this.meta_data['heart_icon']);
-                        // const heart_icon = await detail_element.$eval(this.meta_data['heart_icon'], element => element.textContent.trim());
-                        // console.log(heart_icon);
-                        // if (heart_icon) {
-                            // const statusElement = detail_element.querySelector(this.meta_data['relationship_status_selector']);
-                            // const status_element = await this.page.$eval(this.meta_data['relationship_status_selector'], element => element.textContent.trim());
-                            // console.log(status_element);
-                            // if (status_element) {
-                                // relationship_status = status_element.textContent.trim();
-                            // }
-                        // }
-                    // }
-                    // relationship_status = 'not specified';
-                    // });
                     this.new_row = { profile_name, relationship_status, group_profile_url, profile_url, about_url };
                     await this.updateCSV();
                     pagesScraped++;
