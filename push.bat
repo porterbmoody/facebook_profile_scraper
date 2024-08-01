@@ -1,4 +1,4 @@
 echo Pushing to GitHub...
 git add .
-git commit -m "Packaged bot update"
+git commit -m "bot6.2.exe"
 git push
