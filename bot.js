@@ -4,6 +4,8 @@ const fsSync = require('fs');
 const path = require('path');
 const opn = require('opn');
 const puppeteer = require('puppeteer');
+const { promisify } = require('util');
+const writeFileAsync = promisify(fs.writeFile);
 
 const app = express();
 const port = 3000;
@@ -18,6 +20,7 @@ class Bot {
         this.response = response;
         this.profileDataPath = path.join(__dirname, 'profile_data.csv');
         this.profileDataPath = 'profile_data.csv';
+        this.logFile = 'scraper.log';
         this.meta_data = {
             "login_url": "https://www.facebook.com/",
             "username": "[aria-label='Email or phone number']",
@@ -41,6 +44,28 @@ class Bot {
 
     getRandomDelay(min, max) {
         return Math.floor(Math.random() * (max - min + 1) + min);
+    }
+
+    async initLogFile() {
+        try {
+            console.log('creating log file');
+            // Initialize the log file by writing an empty string (which erases the file)
+            await writeFileAsync(this.logFile, '');
+            console.log('Log file initialized.');
+        } catch (error) {
+            console.error('Error initializing log file:', error);
+        }
+    }
+
+    async logToFile(message) {
+        console.log(message);
+        try {
+            const timestamp = new Date().toISOString();
+            const logMessage = `[${timestamp}] ${message}\n`;
+            await appendFileAsync(this.logFile, logMessage, { flag: 'a' }); // 'a' flag appends to the file
+        } catch (error) {
+            console.error('Error writing to log file:', error);
+        }
     }
 
     async login() {
@@ -90,7 +115,7 @@ class Bot {
         }
     }
 
-    async view_all_members() {
+    async scrape_new_urls() {
         await this.page.goto(this.response['group_url'], { waitUntil: 'networkidle2' });
         let continue_scrolling = true;
         let newUrls = new Set();
@@ -165,7 +190,6 @@ class Bot {
                 const profile_url = await this.page.$eval(this.meta_data['profile_url'], element => element.href);
                 await this.page.goto(profile_url, { waitUntil: 'networkidle2' });
                 await this.page.waitForSelector(this.meta_data['profile_name'], { timeout: 5000 });
-                // const profile_name = 'pizza';
                 const profile_name = await this.page.$eval(this.meta_data['profile_name'], element => element.textContent.trim());
                 const currentUrl = await this.page.url();
                 // const currentUrl = 'https://www.facebook.com/ContessaCleaningCompany';
@@ -240,7 +264,6 @@ class Bot {
     }
 
     async openBrowser() {
-        console.log(`launching browser`);
         this.browser = await puppeteer.launch({
             headless: false,
             executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe',
@@ -279,11 +302,12 @@ class Bot {
 
     async runBot() {
         try {
+            console.log("launching browser");
             await this.openBrowser();
             await this.login();
             await this.read_existing_data();
-            await this.view_all_members();
-            // await this.scrape_group_profile_urls();
+            await this.scrape_new_urls();
+            await this.scrape_group_profile_urls();
             await this.scrape_profiles();
             await this.filter_and_save();
         } catch (error) {
@@ -325,11 +349,10 @@ const server = app.listen(port, () => {
 });
 
 // const bot = new Bot({
-//     username: 'porterbmoody@gmail.com',
-//     password: 'Yoho1mes',
-//     group_url: 'https://www.facebook.com/groups/358727535636578/members',
-//     profiles_to_scrape: '10',
-//     hours_to_scrape: '.01'
+    // username: 'porterbmoody@gmail.com',
+    // password: 'Yoho1mes',
+    // group_url: 'https://www.facebook.com/groups/358727535636578/members',
+    // profiles_to_scrape: '10',
+    // hours_to_scrape: '.01'
 //   });
 // bot.runBot();
-

@@ -1,0 +1,4 @@
+launching browser
+logging in
+number of existing profiles: 73
+number of new urls found is greater than input number of profiles to scrape
