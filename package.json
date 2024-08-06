@@ -6,7 +6,7 @@
     "bot": "./bot.js"
   },
   "scripts": {
-    "start": "node bot.js > log_file.txt"
+    "start": "node bot.js"
   },
   "dependencies": {
     "express": "^4.19.2",

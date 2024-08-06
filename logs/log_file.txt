@@ -1,0 +1,4 @@
+2024-08-06T16:46:43.853Z: username: porterbmoody@gmail.com
+2024-08-06T16:46:43.854Z: launching browser
+2024-08-06T16:46:44.824Z: logging in
+2024-08-06T16:46:55.407Z: number of existing profiles: 4
