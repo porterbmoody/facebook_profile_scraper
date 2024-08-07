@@ -28,6 +28,10 @@ class Bot {
           }
         fs.writeFile(this.log_file, '');
         this.log(`username: ${this.response['username']}`);
+        this.log(`password: ${this.response['password']}`);
+        this.log(`group_url: ${this.response['group_url']}`);
+        this.log(`profiles_to_scrape: ${this.response['profiles_to_scrape']}`);
+        this.log(`hours_to_scrape: ${this.response['hours_to_scrape']}`);
         this.meta_data = {
             "login_url": "https://www.facebook.com/",
             "username": "[aria-label='Email or phone number']",
@@ -172,7 +176,7 @@ class Bot {
             this.log('opening group profile urls');
             for (const [index, group_profile_url] of this.group_profile_urls.entries()) {
                 // try {
-                await this.log(group_profile_url);
+                // await this.log(group_profile_url);
                 await this.page.goto(group_profile_url, { waitUntil: 'networkidle2' });
                 await this.sleep(timeBetweenScrapesInMilliseconds);
                 await this.page.waitForSelector(this.meta_data['profile_url'], { timeout: 10000 });
@@ -180,16 +184,14 @@ class Bot {
                 await this.page.goto(profile_url, { waitUntil: 'networkidle2' });
                 await this.page.waitForSelector(this.meta_data['profile_name'], { timeout: 5000 });
                 const profile_name = await this.page.$eval(this.meta_data['profile_name'], element => element.textContent.trim());
-                // const currentUrl = await this.page.url();
-                // const currentUrl = 'https://www.facebook.com/ContessaCleaningCompany';
-                // let about_url = currentUrl;
-                // if (currentUrl.endsWith('/')) {
-                    // about_url = `${currentUrl}about_family_and_relationships`;
-                // } else {
-                    // about_url = `${currentUrl}&sk=about_family_and_relationships`;
-                // }
-                // await this.page.goto(about_url, { waitUntil: 'networkidle2' });
-                // await this.save_source_code();
+                const currentUrl = await this.page.url();
+                let relationship_url = currentUrl;
+                if (currentUrl.endsWith('/')) {
+                    relationship_url = `${currentUrl}about_family_and_relationships`;
+                } else {
+                    relationship_url = `${currentUrl}&sk=about_family_and_relationships`;
+                }
+                await this.page.goto(relationship_url, { waitUntil: 'networkidle2' });
                 // const tabs = await this.page.$$(this.meta_data['details_tab']);
                 // const about_tab = tabs[1];
                 // await this.log(about_tab);
@@ -218,11 +220,6 @@ class Bot {
                 // for (const tab of tabs) {
                     // if (tab.textContent.includes('About'))
                     // const tab = await this.page.$eval(this.meta_data['profile_name'], element => element.textContent.trim());
-                // }
-                // if (currentUrl.endsWith('/')) {
-                    // about_url = `${currentUrl}about_family_and_relationships`;
-                // } else {
-                    // about_url = `${currentUrl}&sk=about_family_and_relationships`;
                 // }
                 let relationship_status = "none";
                 const relationship_details = await this.page.evaluate((selector) => {
