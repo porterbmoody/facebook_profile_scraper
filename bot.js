@@ -5,6 +5,7 @@ const path = require('path');
 const opn = require('opn');
 const puppeteer = require('puppeteer');
 const { promisify } = require('util');
+// const EventEmitter = require('events');
 
 const app = express();
 const port = 3000;
@@ -14,17 +15,29 @@ app.use(express.static(__dirname));
 
 class Bot {
     constructor(response) {
+        // super();
         this.browser = null;
         this.page = null;
         this.response = response;
         this.profileDataPath = path.join(__dirname, 'profile_data.csv');
         this.profileDataPath = 'profile_data.csv';
-        this.log_file = 'logs/log_file.txt';
+        this.logFolder = 'logs';
+        if (!fsSync.existsSync(this.logFolder)) {
+            fsSync.mkdirSync(this.logFolder);
+            this.log('Logs folder created successfully!');
+        } else {
+            this.log('Logs folder already exists.');
+        }
+
+        this.log_file = this.getNextLogFile();
+        this.log(`Using log file: ${this.log_file}`);
+
+        // this.log_file = 'logs/log_file.txt';
         if (!fsSync.existsSync(this.log_file)) {
             fsSync.mkdirSync('logs');
-            console.log('Folder created successfully!');
+            this.log('Log file created successfully!');
           } else {
-            console.log('Folder already exists.');
+            this.log('Log file already exists.');
           }
         fs.writeFile(this.log_file, '');
         this.log(`username: ${this.response['username']}`);
@@ -51,12 +64,21 @@ class Bot {
         }
     }
 
-    // async __init_log_file__() {
-        // try {
-        // } catch (error) {
-            // console.error('Error initializing log file:', error);
-        // }
-    // }
+    getNextLogFile() {
+        const files = fsSync.readdirSync(this.logFolder);
+        let maxVersion = 0;
+        files.forEach(file => {
+            const match = file.match(/^log_file(\d+)\.txt$/);
+            if (match) {
+                const version = parseInt(match[1], 10);
+                if (version > maxVersion) {
+                    maxVersion = version;
+                }
+            }
+        });
+        const nextVersion = maxVersion + 1;
+        return path.join(this.logFolder, `log${nextVersion}.txt`);
+    }
 
     async log(message) {
         const timestamp = new Date().toISOString();
@@ -72,17 +94,6 @@ class Bot {
     getRandomDelay(min, max) {
         return Math.floor(Math.random() * (max - min + 1) + min);
     }
-
-    // async logToFile(message) {
-        // this.log(message);
-        // try {
-            // const timestamp = new Date().toISOString();
-            // const logMessage = `[${timestamp}] ${message}\n`;
-            // await appendFileAsync(this.log_file, logMessage, { flag: 'a' }); // 'a' flag appends to the file
-        // } catch (error) {
-            // console.error('Error writing to log file:', error);
-        // }
-    // }
 
     async login() {
         try {
@@ -195,7 +206,7 @@ class Bot {
                 // const tabs = await this.page.$$(this.meta_data['details_tab']);
                 // const about_tab = tabs[1];
                 // await this.log(about_tab);
-                // await this.sleep(3000);
+                await this.sleep(20000);
                 // for (const tab of tabs) {}
                 // await this.sleep(20000);
                 // const about_url = await this.page.evaluate(el => el.href, about_tab);
@@ -251,6 +262,8 @@ class Bot {
                 const progressBar = '='.repeat(Math.floor(progress / 2)) + '-'.repeat(50 - Math.floor(progress / 2));
                 await this.log(`[${progressBar}] ${progress.toFixed(2)}% | ${pagesScraped}/${totalProfiles}`);
 
+                // this.emit('progress', { progress: progress.toFixed(2), pagesScraped, totalProfiles });
+
                 // if (pagesScraped == this.response['profiles_to_scrape']) {
                     // break;
                 // }
@@ -302,6 +315,7 @@ class Bot {
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
                 '--disable-notifications'
+                // '--remote-debugging-port=9222'
             ]
         });
         this.page = await this.browser.newPage();
@@ -355,34 +369,34 @@ function closeServer() {
     });
 }
 
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
-});
+// app.get('/', (req, res) => {
+    // res.sendFile(path.join(__dirname, 'index.html'));
+// });
 
-app.post('/run-bot', async (req, res) => {
-    try {
-        const bot = new Bot(req.body);
-        await bot.runBot();
-        res.send('Bot execution completed successfully!');
-        closeServer();
-    } catch (error) {
-        console.error('Error running bot:', error);
-        res.status(500).send('Error running bot');
-        closeServer();
-    }
-});
+// app.post('/run-bot', async (req, res) => {
+    // try {
+        // const bot = new Bot(req.body);
+        // await bot.runBot();
+        // res.send('Bot execution completed successfully!');
+        // closeServer();
+    // } catch (error) {
+        // console.error('Error running bot:', error);
+        // res.status(500).send('Error running bot');
+        // closeServer();
+    // }
+// });
 
-const server = app.listen(port, () => {
-    const server_url = `http://localhost:${port}`;
-    console.log(`starting ${server_url}`);
-    opn(server_url);
-});
+// const server = app.listen(port, () => {
+    // const server_url = `http://localhost:${port}`;
+    // console.log(`starting ${server_url}`);
+    // opn(server_url);
+// });
 
-// const bot = new Bot({
-    // username: 'porterbmoody@gmail.com',
-    // password: 'Yoho1mes',
-    // group_url: 'https://www.facebook.com/groups/358727535636578/members',
-    // profiles_to_scrape: '10',
-    // hours_to_scrape: '.01'
-//   });
-// bot.runBot();
+const bot = new Bot({
+    username: 'porterbmoody@gmail.com',
+    password: 'Yoho1mes',
+    group_url: 'https://www.facebook.com/groups/358727535636578/members',
+    profiles_to_scrape: '10',
+    hours_to_scrape: '.01'
+  });
+bot.runBot();
