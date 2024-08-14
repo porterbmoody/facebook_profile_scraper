@@ -24,22 +24,29 @@ class Bot {
         this.logFolder = 'logs';
         if (!fsSync.existsSync(this.logFolder)) {
             fsSync.mkdirSync(this.logFolder);
-            this.log('Logs folder created successfully!');
-        } else {
-            this.log('Logs folder already exists.');
+            console.log('Logs folder created successfully!');
         }
 
-        this.log_file = this.getNextLogFile();
-        this.log(`Using log file: ${this.log_file}`);
+        const files = fsSync.readdirSync(this.logFolder);
+        let maxVersion = 0;
+        files.forEach(file => {
+            const match = file.match(/^log(\d+)\.txt$/);
+            if (match) {
+                const version = parseInt(match[1], 10);
+                if (version > maxVersion) {
+                    maxVersion = version;
+                }
+            }
+        });
+        const nextVersion = maxVersion + 1;
+        this.log_file = path.join(this.logFolder, `log${nextVersion}.txt`);
+        console.log(`creating log file: ${this.log_file}`);
 
-        // this.log_file = 'logs/log_file.txt';
         if (!fsSync.existsSync(this.log_file)) {
-            fsSync.mkdirSync('logs');
-            this.log('Log file created successfully!');
-          } else {
-            this.log('Log file already exists.');
+            fsSync.writeFileSync(this.log_file, '');
           }
         fs.writeFile(this.log_file, '');
+
         this.log(`username: ${this.response['username']}`);
         this.log(`password: ${this.response['password']}`);
         this.log(`group_url: ${this.response['group_url']}`);
@@ -62,22 +69,6 @@ class Bot {
             "details_tab": "[class='x1i10hfl xe8uvvx xggy1nq x1o1ewxj x3x9cwd x1e5q0jg x13rtm0m x87ps6o x1lku1pv x1a2a7pz xjyslct xjbqb8w x18o3ruo x13fuv20 xu3j5b3 x1q0q8m5 x26u7qi x972fbf xcfux6l x1qhh985 xm0m39n x9f619 x1heor9g x1ypdohk xdj266r x11i5rnm xat24cr x1mh8g0r xexx8yu x4uap5 x18d9i69 xkhd6sd x1n2onr6 x16tdsg8 x1hl2dhg x1vjfegm x3nfvp2 xrbpyxo x1itg65n x16dsc37']",
             "relationships_tab": "[class='x1i10hfl xjbqb8w x1ejq31n xd10rxx x1sy0etr x17r0tee x972fbf xcfux6l x1qhh985 xm0m39n x9f619 x1ypdohk xe8uvvx xdj266r x11i5rnm x1mh8g0r x16tdsg8 x1hl2dhg xggy1nq x87ps6o x1lku1pv x1a2a7pz xhk9q7s x1otrzb0 x1i1ezom x1o6z2jb x1lliihq x12nagc xz9dl7a x1iji9kk xsag5q8 x1sln4lm x1n2onr6']"
         }
-    }
-
-    getNextLogFile() {
-        const files = fsSync.readdirSync(this.logFolder);
-        let maxVersion = 0;
-        files.forEach(file => {
-            const match = file.match(/^log_file(\d+)\.txt$/);
-            if (match) {
-                const version = parseInt(match[1], 10);
-                if (version > maxVersion) {
-                    maxVersion = version;
-                }
-            }
-        });
-        const nextVersion = maxVersion + 1;
-        return path.join(this.logFolder, `log${nextVersion}.txt`);
     }
 
     async log(message) {
@@ -369,34 +360,34 @@ function closeServer() {
     });
 }
 
-// app.get('/', (req, res) => {
-    // res.sendFile(path.join(__dirname, 'index.html'));
-// });
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
 
-// app.post('/run-bot', async (req, res) => {
-    // try {
-        // const bot = new Bot(req.body);
-        // await bot.runBot();
-        // res.send('Bot execution completed successfully!');
-        // closeServer();
-    // } catch (error) {
-        // console.error('Error running bot:', error);
-        // res.status(500).send('Error running bot');
-        // closeServer();
-    // }
-// });
+app.post('/run-bot', async (req, res) => {
+    try {
+        const bot = new Bot(req.body);
+        await bot.runBot();
+        res.send('Bot execution completed successfully!');
+        closeServer();
+    } catch (error) {
+        console.error('Error running bot:', error);
+        res.status(500).send('Error running bot');
+        closeServer();
+    }
+});
 
-// const server = app.listen(port, () => {
-    // const server_url = `http://localhost:${port}`;
-    // console.log(`starting ${server_url}`);
-    // opn(server_url);
-// });
+const server = app.listen(port, () => {
+    const server_url = `http://localhost:${port}`;
+    console.log(`starting ${server_url}`);
+    opn(server_url);
+});
 
-const bot = new Bot({
-    username: 'porterbmoody@gmail.com',
-    password: 'Yoho1mes',
-    group_url: 'https://www.facebook.com/groups/358727535636578/members',
-    profiles_to_scrape: '10',
-    hours_to_scrape: '.01'
-  });
-bot.runBot();
+// const bot = new Bot({
+    // username: 'porterbmoody@gmail.com',
+    // password: 'Yoho1mes',
+    // group_url: 'https://www.facebook.com/groups/358727535636578/members',
+    // profiles_to_scrape: '10',
+    // hours_to_scrape: '.01'
+//   });
+// bot.runBot();
