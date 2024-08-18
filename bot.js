@@ -15,7 +15,6 @@ app.use(express.static(__dirname));
 
 class Bot {
     constructor(response) {
-        // super();
         this.browser = null;
         this.page = null;
         this.response = response;
@@ -141,6 +140,7 @@ class Bot {
             const elements = await this.page.$$(this.meta_data['group_members']);
             for (let element of elements) {
                 const href = await this.page.evaluate(el => el.href, element);
+                console.log(href);
                 if (href && href.includes('groups') && !this.existing_profile_data['group_profile_url'].includes(href)) {
                     newUrls.add(href);
                 }
