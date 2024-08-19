@@ -140,8 +140,8 @@ class Bot {
             const elements = await this.page.$$(this.meta_data['group_members']);
             for (let element of elements) {
                 const href = await this.page.evaluate(el => el.href, element);
-                console.log(href);
                 if (href && href.includes('groups') && !this.existing_profile_data['group_profile_url'].includes(href)) {
+                    console.log(href);
                     newUrls.add(href);
                 }
             }
@@ -384,10 +384,10 @@ const server = app.listen(port, () => {
 });
 
 // const bot = new Bot({
-    // username: 'porterbmoody@gmail.com',
-    // password: 'Yoho1mes',
-    // group_url: 'https://www.facebook.com/groups/358727535636578/members',
-    // profiles_to_scrape: '10',
-    // hours_to_scrape: '.01'
+//     username: 'porterbmoody@gmail.com',
+//     password: 'Yoho1mes',
+//     group_url: 'https://www.facebook.com/groups/358727535636578/members',
+//     profiles_to_scrape: '10',
+//     hours_to_scrape: '.01'
 //   });
 // bot.runBot();
