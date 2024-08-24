@@ -1,0 +1,14 @@
+2024-08-24T05:32:20.364Z: username: porterbmoody@gmail.com
+2024-08-24T05:32:20.365Z: password: Yoho1mes
+2024-08-24T05:32:20.366Z: group_url: https://www.facebook.com/groups/358727535636578/members
+2024-08-24T05:32:20.366Z: profiles_to_scrape: 10
+2024-08-24T05:32:20.367Z: hours_to_scrape: .01
+2024-08-24T05:32:20.368Z: launching browser
+2024-08-24T05:32:21.451Z: logging in
+2024-08-24T05:32:32.689Z: number of existing profiles: 1
+2024-08-24T05:32:35.523Z: number of new urls found is greater than input number of profiles to scrape
+2024-08-24T05:32:35.524Z: profiles to scrape: 21
+2024-08-24T05:32:35.527Z: in hours: .01
+2024-08-24T05:32:35.527Z: opening group profile urls
+2024-08-24T05:32:35.530Z: Error scraping group profile URLs:
+2024-08-24T05:32:35.531Z: TypeError: Cannot read properties of undefined (reading 'entries')

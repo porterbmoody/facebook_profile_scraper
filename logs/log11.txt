@@ -1,0 +1,12 @@
+2024-08-23T17:04:50.555Z: username: porterbmoody@gmail.com
+2024-08-23T17:04:50.557Z: password: Yoho1mes
+2024-08-23T17:04:50.557Z: group_url: https://www.facebook.com/groups/358727535636578/members
+2024-08-23T17:04:50.558Z: profiles_to_scrape: 10
+2024-08-23T17:04:50.558Z: hours_to_scrape: .01
+2024-08-23T17:04:50.559Z: launching browser
+2024-08-23T17:04:51.621Z: logging in
+2024-08-23T17:05:02.219Z: number of existing profiles: 1
+2024-08-23T17:05:06.318Z: https://www.facebook.com/help/727473118066542
+2024-08-23T17:05:06.319Z: null
+2024-08-23T17:05:06.323Z: null
+2024-08-23T17:05:06.322Z: https://www.facebook.com/groups/358727535636578/user/100041808650807/

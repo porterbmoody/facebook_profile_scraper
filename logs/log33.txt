@@ -1,0 +1,9 @@
+2024-08-24T01:50:57.211Z: username: porterbmoody@gmail.com
+2024-08-24T01:50:57.213Z: password: Yoho1mes
+2024-08-24T01:50:57.214Z: group_url: https://www.facebook.com/groups/358727535636578/members
+2024-08-24T01:50:57.217Z: profiles_to_scrape: 10
+2024-08-24T01:50:57.218Z: hours_to_scrape: .01
+2024-08-24T01:50:57.218Z: launching browser
+2024-08-24T01:50:58.320Z: logging in
+2024-08-24T01:51:08.187Z: number of existing profiles: 1
+2024-08-24T01:51:12.230Z: number of new urls found is greater than input number of profiles to scrape

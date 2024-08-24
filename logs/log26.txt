@@ -1,0 +1,8 @@
+2024-08-23T18:54:29.232Z: username: porterbmoody@gmail.com
+2024-08-23T18:54:29.233Z: password: Yoho1mes
+2024-08-23T18:54:29.235Z: profiles_to_scrape: 10
+2024-08-23T18:54:29.234Z: group_url: https://www.facebook.com/groups/358727535636578/members
+2024-08-23T18:54:29.236Z: hours_to_scrape: .01
+2024-08-23T18:54:29.236Z: launching browser
+2024-08-23T18:54:30.291Z: logging in
+2024-08-23T18:54:40.827Z: number of existing profiles: 1

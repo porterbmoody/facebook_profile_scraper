@@ -99,7 +99,7 @@ class Bot {
     }
 
     async read_existing_data() {
-        const headers = ['profile_name', 'relationship_status', 'group_profile_url', 'profile_url', 'relationship_url'];
+        const headers = ['profile_name', 'relationship_status', 'profile_id', 'relationship_url'];
         try {
             if (!fsSync.existsSync(this.profileDataPath)) {
                 await fs.writeFile(this.profileDataPath, headers.join(',') + '\n');
@@ -135,17 +135,21 @@ class Bot {
     async scrape_new_urls() {
         await this.page.goto(this.response['group_url'], { waitUntil: 'networkidle2' });
         let continue_scrolling = true;
-        let newUrls = new Set();
+        let new_ids = new Set();
         while (continue_scrolling) {
             const elements = await this.page.$$(this.meta_data['group_members']);
             for (let element of elements) {
                 const href = await this.page.evaluate(el => el.href, element);
-                if (href && href.includes('groups') && !this.existing_profile_data['group_profile_url'].includes(href)) {
-                    console.log(href);
-                    newUrls.add(href);
+                const regex = /https:\/\/www\.facebook\.com\/groups\/\d{15}\/user\/(\d+)\//;
+                const match = href.match(regex);
+                if (match) {
+                    const profile_id = match[1];
+                    if (!this.existing_profile_data['profile_id'].includes(profile_id)) {
+                        new_ids.add(profile_id);
+                    }
                 }
             }
-            if (newUrls.size >= this.response['profiles_to_scrape']) {
+            if (new_ids.size >= this.response['profiles_to_scrape']) {
                 this.log(`number of new urls found is greater than input number of profiles to scrape`);
                 continue_scrolling = false;
                 break;
@@ -164,25 +168,25 @@ class Bot {
                 await this.sleep(1000);
             }
         }
-        this.group_profile_urls = Array.from(newUrls);
+        this.profile_ids = Array.from(new_ids);
     }
-
+ 
     async scrape_profiles() {
         try {
             const totalRunTimeInMilliseconds = this.response['hours_to_scrape'] * 60 * 60 * 1000;
             const timeBetweenScrapesInMilliseconds = totalRunTimeInMilliseconds / this.response['profiles_to_scrape'];
             let pagesScraped = 0;
-            const totalProfiles = this.group_profile_urls.length;
-            this.log(`profiles to scrape: ${this.group_profile_urls.length}`);
+            const totalProfiles = this.profile_ids.length;
+            this.log(`profiles to scrape: ${this.profile_ids.length}`);
             this.log(`in hours: ${this.response['hours_to_scrape']}`);
-            this.log('opening group profile urls');
-            for (const [index, group_profile_url] of this.group_profile_urls.entries()) {
-                // try {
-                // await this.log(group_profile_url);
-                await this.page.goto(group_profile_url, { waitUntil: 'networkidle2' });
+            this.log('opening profile urls');
+            for (const [index, profile_id] of this.profile_ids.entries()) {
+                const profile_url = `https://www.facebook.com/profile.php?id=${profile_id}`;
+                // await this.page.goto(group_profile_url, { waitUntil: 'networkidle2' });
+                this.log(`waiting ${timeBetweenScrapesInMilliseconds}`)
                 await this.sleep(timeBetweenScrapesInMilliseconds);
-                await this.page.waitForSelector(this.meta_data['profile_url'], { timeout: 10000 });
-                const profile_url = await this.page.$eval(this.meta_data['profile_url'], element => element.href);
+                // await this.page.waitForSelector(this.meta_data['profile_url'], { timeout: 10000 });
+                // const profile_url = await this.page.$eval(this.meta_data['profile_url'], element => element.href);
                 await this.page.goto(profile_url, { waitUntil: 'networkidle2' });
                 await this.page.waitForSelector(this.meta_data['profile_name'], { timeout: 5000 });
                 const profile_name = await this.page.$eval(this.meta_data['profile_name'], element => element.textContent.trim());
@@ -194,35 +198,6 @@ class Bot {
                     relationship_url = `${currentUrl}&sk=about_family_and_relationships`;
                 }
                 await this.page.goto(relationship_url, { waitUntil: 'networkidle2' });
-                // const tabs = await this.page.$$(this.meta_data['details_tab']);
-                // const about_tab = tabs[1];
-                // await this.log(about_tab);
-                await this.sleep(20000);
-                // for (const tab of tabs) {}
-                // await this.sleep(20000);
-                // const about_url = await this.page.evaluate(el => el.href, about_tab);
-                // await this.log(about_url);
-                // await this.sleep(20000);
-                // await this.page.goto(about_url, { waitUntil: 'networkidle2' });
-                // await this.sleep(5000);
-                // const relationship_url = `${about_url}_family_and_relationships`;
-                // await this.log(relationship_url);
-                // await this.sleep(3000);
-                // await this.page.goto(relationship_url, { waitUntil: 'networkidle2' });
-                // const sub_tabs = await this.page.$$(this.meta_data['relationships_tab']);
-                // for (const sub_tab of sub_tabs) {
-                    // const href = await this.page.evaluate(el => el.href, sub_tab);
-                    // this.log(href);
-                    // if (href && href.includes('family_and_relationships')) {
-                        // family_relationships_url = href;
-                        // break;
-                    // }
-                // }
-                // await this.sleep(20000);
-                // for (const tab of tabs) {
-                    // if (tab.textContent.includes('About'))
-                    // const tab = await this.page.$eval(this.meta_data['profile_name'], element => element.textContent.trim());
-                // }
                 let relationship_status = "none";
                 const relationship_details = await this.page.evaluate((selector) => {
                     const statusElement = document.querySelector(selector);
@@ -231,9 +206,7 @@ class Bot {
                     while (container && !container.querySelector('div')) {
                         container = container.parentElement;
                     }
-
                     if (!container) return [];
-        
                     const divs = Array.from(container.querySelectorAll('div'))
                         .filter(div => div !== statusElement && div.textContent.trim() !== '');
                     return divs.map(div => div.textContent.trim());
@@ -243,26 +216,13 @@ class Bot {
                 } else {
                     relationship_status = "none";
                 }
-
-                this.new_row = { profile_name, relationship_status, group_profile_url, profile_url, relationship_url };
+                this.new_row = { profile_name, relationship_status, profile_id, relationship_url };
                 await this.updateCSV();
-
                 pagesScraped++;
-
                 const progress = (pagesScraped / totalProfiles) * 100;
                 const progressBar = '='.repeat(Math.floor(progress / 2)) + '-'.repeat(50 - Math.floor(progress / 2));
                 await this.log(`[${progressBar}] ${progress.toFixed(2)}% | ${pagesScraped}/${totalProfiles}`);
-
-                // this.emit('progress', { progress: progress.toFixed(2), pagesScraped, totalProfiles });
-
-                // if (pagesScraped == this.response['profiles_to_scrape']) {
-                    // break;
-                // }
-                // } catch (error) {
-                    // console.error(`Error scraping profile: ${group_profile_url}`, error);
-                // }
             }
-
             this.log(`Scraping completed. Total profiles scraped: ${pagesScraped}`);
         } catch (error) {
             console.log(error);
@@ -384,10 +344,10 @@ const server = app.listen(port, () => {
 });
 
 // const bot = new Bot({
-//     username: 'porterbmoody@gmail.com',
-//     password: 'Yoho1mes',
-//     group_url: 'https://www.facebook.com/groups/358727535636578/members',
-//     profiles_to_scrape: '10',
-//     hours_to_scrape: '.01'
+    // username: 'porterbmoody@gmail.com',
+    // password: 'Yoho1mes',
+    // group_url: 'https://www.facebook.com/groups/358727535636578/members',
+    // profiles_to_scrape: '10',
+    // hours_to_scrape: '.001'
 //   });
 // bot.runBot();

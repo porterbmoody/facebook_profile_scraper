@@ -1,0 +1,31 @@
+2024-08-24T05:25:45.324Z: username: porterbmoody@gmail.com
+2024-08-24T05:25:45.325Z: password: Yoho1mes
+2024-08-24T05:25:45.328Z: profiles_to_scrape: 10
+2024-08-24T05:25:45.326Z: group_url: https://www.facebook.com/groups/358727535636578/members
+2024-08-24T05:25:45.329Z: hours_to_scrape: .01
+2024-08-24T05:25:45.330Z: launching browser
+2024-08-24T05:25:46.421Z: logging in
+2024-08-24T05:25:57.308Z: number of existing profiles: 1
+2024-08-24T05:26:00.403Z: https://www.facebook.com/profile.php?id=100041808650807
+2024-08-24T05:26:00.407Z: https://www.facebook.com/profile.php?id=100000333213273
+2024-08-24T05:26:00.409Z: https://www.facebook.com/profile.php?id=100000267193797
+2024-08-24T05:26:00.411Z: https://www.facebook.com/profile.php?id=100052655911502
+2024-08-24T05:26:00.414Z: https://www.facebook.com/profile.php?id=100009966160929
+2024-08-24T05:26:00.417Z: https://www.facebook.com/profile.php?id=100091396535484
+2024-08-24T05:26:00.420Z: https://www.facebook.com/profile.php?id=100044525795568
+2024-08-24T05:26:00.423Z: https://www.facebook.com/profile.php?id=100021350722103
+2024-08-24T05:26:00.428Z: https://www.facebook.com/profile.php?id=100000513415670
+2024-08-24T05:26:00.431Z: https://www.facebook.com/profile.php?id=100044525795568
+2024-08-24T05:26:00.434Z: https://www.facebook.com/profile.php?id=100000259639901
+2024-08-24T05:26:00.437Z: https://www.facebook.com/profile.php?id=100005071605152
+2024-08-24T05:26:00.440Z: https://www.facebook.com/profile.php?id=61564357606509
+2024-08-24T05:26:00.444Z: https://www.facebook.com/profile.php?id=1580106954
+2024-08-24T05:26:00.447Z: https://www.facebook.com/profile.php?id=100001498471862
+2024-08-24T05:26:00.450Z: https://www.facebook.com/profile.php?id=100023643272939
+2024-08-24T05:26:00.453Z: https://www.facebook.com/profile.php?id=100006173710112
+2024-08-24T05:26:00.455Z: https://www.facebook.com/profile.php?id=61564578549279
+2024-08-24T05:26:00.459Z: https://www.facebook.com/profile.php?id=100025417772464
+2024-08-24T05:26:00.463Z: https://www.facebook.com/profile.php?id=1271761676
+2024-08-24T05:26:00.466Z: https://www.facebook.com/profile.php?id=100005827261934
+2024-08-24T05:26:00.468Z: https://www.facebook.com/profile.php?id=100002118644392
+2024-08-24T05:26:00.469Z: number of new urls found is greater than input number of profiles to scrape
