@@ -149,6 +149,7 @@ class Bot {
                     }
                 }
             }
+            console.log(new_ids);
             if (new_ids.size >= this.response['profiles_to_scrape']) {
                 this.log(`number of new urls found is greater than input number of profiles to scrape`);
                 continue_scrolling = false;
@@ -347,7 +348,7 @@ const server = app.listen(port, () => {
     // username: 'porterbmoody@gmail.com',
     // password: 'Yoho1mes',
     // group_url: 'https://www.facebook.com/groups/358727535636578/members',
-    // profiles_to_scrape: '10',
-    // hours_to_scrape: '.001'
+//     profiles_to_scrape: '20',
+//     hours_to_scrape: '.001'
 //   });
 // bot.runBot();
