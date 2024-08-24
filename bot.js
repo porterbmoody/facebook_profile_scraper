@@ -144,16 +144,14 @@ class Bot {
                 const match = href.match(regex);
                 if (match) {
                     const profile_id = match[1];
-                    if (!this.existing_profile_data['profile_id'].includes(profile_id)) {
+                    if (!this.existing_profile_data['profile_id'].includes(profile_id) && new_ids.size < this.response['profiles_to_scrape']) {
                         new_ids.add(profile_id);
                     }
                 }
             }
-            console.log(new_ids);
             if (new_ids.size >= this.response['profiles_to_scrape']) {
                 this.log(`number of new urls found is greater than input number of profiles to scrape`);
                 continue_scrolling = false;
-                break;
             }
             const isAtBottom = await this.page.evaluate(() => {
                 const scrollHeight = document.documentElement.scrollHeight;
@@ -183,11 +181,8 @@ class Bot {
             this.log('opening profile urls');
             for (const [index, profile_id] of this.profile_ids.entries()) {
                 const profile_url = `https://www.facebook.com/profile.php?id=${profile_id}`;
-                // await this.page.goto(group_profile_url, { waitUntil: 'networkidle2' });
                 this.log(`waiting ${timeBetweenScrapesInMilliseconds}`)
                 await this.sleep(timeBetweenScrapesInMilliseconds);
-                // await this.page.waitForSelector(this.meta_data['profile_url'], { timeout: 10000 });
-                // const profile_url = await this.page.$eval(this.meta_data['profile_url'], element => element.href);
                 await this.page.goto(profile_url, { waitUntil: 'networkidle2' });
                 await this.page.waitForSelector(this.meta_data['profile_name'], { timeout: 5000 });
                 const profile_name = await this.page.$eval(this.meta_data['profile_name'], element => element.textContent.trim());
@@ -267,7 +262,6 @@ class Bot {
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
                 '--disable-notifications'
-                // '--remote-debugging-port=9222'
             ]
         });
         this.page = await this.browser.newPage();
