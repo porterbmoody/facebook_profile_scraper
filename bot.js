@@ -294,7 +294,11 @@ class Bot {
     async runBot() {
         try {
             await this.open_browser();
+            await this.log(`wating 15 seconds`);
+            await this.sleep(15000);
             await this.login();
+            await this.log(`wating 15 seconds`);
+            await this.sleep(15000);
             await this.read_existing_data();
             await this.scrape_new_urls();
             await this.scrape_profiles();
